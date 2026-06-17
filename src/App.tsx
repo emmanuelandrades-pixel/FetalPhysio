@@ -2520,7 +2520,281 @@ const T8Content = () => (
   </div>
 );
 
-// TOPIC_CONTENT definido DESPUÉS de todos los componentes T1–T8
+// ─── MÓDULO 3: ESTADOS CONDUCTUALES ───────────────────────────────────────
+
+const CFG_QUIESCENCIA = { baseline:135, variability:3,  accels:false, cycling:false, decelType:'none', contractions:[3,7] };
+const CFG_SUENO_ACTIVO= { baseline:140, variability:18, accels:true,  cycling:true,  decelType:'none', contractions:[4,8] };
+const CFG_VIGILIA     = { baseline:145, variability:20, accels:true,  cycling:true,  decelType:'none', contractions:[3,6,9] };
+const CFG_CYCLING     = { baseline:140, variability:15, accels:true,  cycling:true,  decelType:'none', contractions:[4,8] };
+
+const T9Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      La <strong className="text-slate-800">quiescencia fetal</strong> (Estado 1F) corresponde a períodos de reposo conductual en que el feto reduce su actividad motora, su frecuencia cardíaca basal desciende levemente y la variabilidad disminuye de forma fisiológica. Dura entre 20 y 40 minutos. <strong className="text-slate-800">No es un signo de compromiso</strong> — es sueño tranquilo normal.
+    </p>
+
+    <MiniCTG config={CFG_QUIESCENCIA} label="Estado 1F — Quiescencia fetal (sueño tranquilo)"
+      caption="Variabilidad mínima-baja (3–5 lpm), ausencia de aceleraciones y escasa actividad motora. Línea basal estable. Duración habitual 20–40 min. Sin desaceleraciones." />
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Características del Estado 1F</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-sm">
+        <div className="grid grid-cols-2 bg-slate-800 text-white text-xs">
+          {['Parámetro','Hallazgo en Estado 1F'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['FCF basal','Estable, puede descender 5–10 lpm respecto a la vigilia'],
+          ['Variabilidad','Mínima a baja: 3–6 lpm (fisiológica)'],
+          ['Aceleraciones','Ausentes o muy escasas'],
+          ['Movimientos fetales','Ausentes o mínimos'],
+          ['Duración habitual','20–40 minutos'],
+          ['Respuesta a estímulo vibroacústico','Puede despertar y pasar a Estado 2F o 4F'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-2 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-3 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Diagnóstico diferencial crítico</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-sm">
+        <div className="grid grid-cols-3 bg-slate-800 text-white text-xs">
+          {['Criterio','Estado 1F (quiescencia)','Hipoxia con variabilidad reducida'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Variabilidad','3–6 lpm','0–2 lpm (ausente)'],
+          ['Duración','20–40 min y recupera','> 60 min sin recuperación'],
+          ['Cycling','Presencia de otros estados','Pérdida progresiva del cycling'],
+          ['Contexto clínico','Sin factores de riesgo','RCIU, preeclampsia, taquisistolia'],
+          ['Desaceleraciones','Ausentes','Tardías o variables complicadas'],
+          ['Respuesta EVA','Despierta y reactiva','No reactiva'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-3 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+      <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5"/>
+      <div>
+        <p className="font-bold text-amber-800 text-sm mb-1">Error frecuente</p>
+        <p className="text-amber-700 text-sm leading-relaxed">
+          Interpretar la quiescencia fisiológica como variabilidad reducida patológica lleva a intervenciones innecesarias. La clave es la <strong>duración</strong> y el <strong>contexto clínico</strong>: esperar 40 minutos y evaluar si el trazado recupera variabilidad y aceleraciones espontáneamente.
+        </p>
+      </div>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "Un feto que duerme no es un feto que se hipoxia. Espera al menos 40 minutos antes de actuar sobre variabilidad baja aislada sin contexto de riesgo."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const T10Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      El <strong className="text-slate-800">sueño activo</strong> (Estado 2F) es el equivalente fetal del sueño REM del adulto. Es el estado conductual más frecuente en el feto a término, ocupando el 60–70% del tiempo. Se caracteriza por variabilidad normal, movimientos oculares y corporales, y aceleraciones espontáneas — es el estado que más se parece a un "trazado reactivo" ideal.
+    </p>
+
+    <MiniCTG config={CFG_SUENO_ACTIVO} label="Estado 2F — Sueño activo (REM fetal)"
+      caption="Variabilidad normal (15–25 lpm), aceleraciones espontáneas, movimientos fetales intermitentes. Cycling activo. Es el estado conductual más frecuente en el feto a término sano." />
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Características del Estado 2F</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-sm">
+        <div className="grid grid-cols-2 bg-blue-900 text-white text-xs">
+          {['Parámetro','Hallazgo en Estado 2F'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['FCF basal','Normal para edad gestacional (110–160 lpm)'],
+          ['Variabilidad','Normal: 10–25 lpm'],
+          ['Aceleraciones','Frecuentes y espontáneas (asociadas a movimientos)'],
+          ['Movimientos fetales','Activos, intermitentes, cuerpo y ojos'],
+          ['Duración habitual','40–60 minutos'],
+          ['Proporción del tiempo','60–70% del tiempo total en feto a término'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-2 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-3 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+      <p className="font-bold text-blue-800 text-sm mb-2">Relevancia clínica del Estado 2F</p>
+      <ul className="space-y-2 text-blue-700 text-sm">
+        <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">•</span>Es el estado en que más frecuentemente se realizan las pruebas de bienestar fetal (NST, PBF).</li>
+        <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">•</span>Un NST reactivo en Estado 2F tiene alto valor predictivo negativo de acidosis fetal.</li>
+        <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">•</span>La transición desde Estado 1F (quiescencia) a Estado 2F confirma el cycling fisiológico.</li>
+        <li className="flex items-start gap-2"><span className="text-blue-500 mt-0.5">•</span>La ausencia de Estado 2F en un trazado prolongado es señal de alerta neurológica.</li>
+      </ul>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "El Estado 2F es el estado que hace reactivo el NST. Sin él, no hay reactividad — y sin reactividad sostenida, no hay cycling. El REM fetal es el mejor marcador de integridad neurológica."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const T11Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      Los <strong className="text-slate-800">estados de vigilia fetal</strong> (Estados 3F y 4F) corresponden a períodos de actividad consciente del feto, con máxima reactividad cardíaca. Son los estados de menor duración pero de mayor intensidad de respuesta. El Estado 3F es vigilia tranquila (ojos abiertos, sin actividad motora intensa) y el Estado 4F es vigilia activa (máxima actividad motora y cardíaca).
+    </p>
+
+    <MiniCTG config={CFG_VIGILIA} label="Estado 3F/4F — Vigilia fetal (máxima reactividad)"
+      caption="Variabilidad máxima (20–30 lpm), aceleraciones frecuentes y amplias, actividad motora intensa. FCF puede elevarse transitoriamente. Es el estado de mayor respuesta a estímulos externos." />
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Estados de vigilia: 3F vs 4F</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-sm">
+        <div className="grid grid-cols-3 bg-slate-800 text-white text-xs">
+          {['Parámetro','Estado 3F (vigilia tranquila)','Estado 4F (vigilia activa)'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Ojos','Abiertos','Abiertos'],
+          ['Actividad motora','Mínima','Intensa y continua'],
+          ['FCF basal','Levemente elevada','Elevada, variable'],
+          ['Variabilidad','Alta (20–25 lpm)','Muy alta (25–30 lpm)'],
+          ['Aceleraciones','Frecuentes','Muy frecuentes, amplias'],
+          ['Duración','10–20 min','5–15 min'],
+          ['Proporción del tiempo','< 10%','< 5%'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-3 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+      <p className="font-bold text-emerald-800 text-sm mb-2">Importancia clínica de los estados de vigilia</p>
+      <ul className="space-y-2 text-emerald-700 text-sm">
+        <li className="flex items-start gap-2"><span className="text-emerald-500 mt-0.5">•</span><span>Son el momento óptimo para realizar pruebas de bienestar fetal con estímulo externo (EVA, estimulación digital).</span></li>
+        <li className="flex items-start gap-2"><span className="text-emerald-500 mt-0.5">•</span><span>La respuesta acelerativa al estímulo vibroacústico confirma integridad del arco reflejo fetal.</span></li>
+        <li className="flex items-start gap-2"><span className="text-emerald-500 mt-0.5">•</span><span>En el feto con hipoxia, los estados de vigilia son los primeros en desaparecer — antes que la variabilidad basal.</span></li>
+        <li className="flex items-start gap-2"><span className="text-emerald-500 mt-0.5">•</span><span>La ausencia de respuesta a EVA en contexto de variabilidad reducida es indicador de acidosis avanzada.</span></li>
+      </ul>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "El primer signo de compromiso neurológico fetal no es la bradicardia — es la pérdida de los estados de vigilia y del cycling. Un feto que nunca 'despierta' en 60 minutos de trazado no está dormido: está comprometido."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const T12Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      El <strong className="text-slate-800">cycling fetal</strong> es la alternancia rítmica y espontánea entre los distintos estados conductuales fetales (1F → 2F → 3F/4F → 1F…) a lo largo del trazado. Es el <strong className="text-slate-800">parámetro más importante y más subestimado</strong> de la interpretación CTG. Su presencia confirma integridad del sistema nervioso central fetal. Su pérdida es el primer marcador de compromiso neurológico, incluso antes de que la variabilidad basal se reduzca significativamente.
+    </p>
+
+    <MiniCTG config={CFG_CYCLING} label="Cycling fetal normal — alternancia de estados conductuales"
+      caption="Períodos de variabilidad alta con aceleraciones (Estado 2F/vigilia) alternando con períodos de variabilidad más baja y quietud (Estado 1F). La alternancia regular cada 4–8 min confirma cycling activo." duration={15}/>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">¿Qué es y qué no es cycling?</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-sm">
+        <div className="grid grid-cols-2 bg-slate-800 text-white text-xs">
+          {['Cycling fetal (correcto)','Variabilidad (concepto diferente)'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Alternancia entre estados conductuales','Amplitud de la oscilación latido a latido'],
+          ['Refleja integridad del SNC (corteza-tronco)','Refleja actividad del sistema nervioso autónomo'],
+          ['Evaluación en ventana mínima de 60 minutos','Evaluable en cualquier segmento del trazado'],
+          ['Ausente en hipoxia avanzada y prematuridad extrema','Reducida en hipoxia, fármacos, sueño profundo'],
+          ['Primer parámetro en perderse con hipoxia','Segundo o tercer parámetro en perderse'],
+          ['No equivale a variabilidad alta','Puede haber variabilidad normal sin cycling'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-2 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-3 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Valor pronóstico del cycling</h3>
+      <div className="space-y-3">
+        {[
+          { color:'bg-emerald-100 border-emerald-300 text-emerald-800', label:'Cycling presente', desc:'Integridad del SNC confirmada. Reserva fetal adecuada. Continuar monitorización habitual.' },
+          { color:'bg-amber-100 border-amber-300 text-amber-800', label:'Cycling reducido o irregular', desc:'Señal de alerta precoz. Evaluar contexto clínico (prematuridad, medicamentos, ayuno). Ampliar ventana de observación a 90 min.' },
+          { color:'bg-red-100 border-red-300 text-red-800', label:'Cycling ausente en > 60 min', desc:'Signo de compromiso neurológico. Indica hipoxia avanzada o lesión del SNC. Requiere evaluación urgente y decisión de vía de parto.' },
+        ].map((item,i) => (
+          <div key={i} className={`rounded-xl border p-4 ${item.color}`}>
+            <p className="font-bold text-sm mb-1">{item.label}</p>
+            <p className="text-sm leading-relaxed">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Causas de pérdida de cycling</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-sm">
+        <div className="grid grid-cols-2 bg-slate-800 text-white text-xs">
+          {['Causa','Mecanismo'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Hipoxia progresiva','Depresión del SNC por acidosis metabólica acumulada'],
+          ['Prematuridad extrema (< 28 sem)','Inmadurez de la corteza cerebral y circuitos de sueño'],
+          ['Opioides maternos (morfina, petidina)','Sedación central que altera los ciclos de sueño fetal'],
+          ['Corticoides antenatales (primeras 48 h)','Efecto transitorio sobre la variabilidad y el cycling'],
+          ['Lesión neurológica fetal','Daño directo a los centros reguladores del sueño'],
+          ['Infección/corioamnionitis','Depresión neurológica por mediadores inflamatorios'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-2 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-3 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+      <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5"/>
+      <div>
+        <p className="font-bold text-amber-800 text-sm mb-1">Regla práctica de evaluación</p>
+        <p className="text-amber-700 text-sm leading-relaxed">
+          Para evaluar cycling se necesita una ventana mínima de <strong>60 minutos</strong> de trazado continuo. Un trazado de 20 minutos es insuficiente para afirmar que el cycling está ausente — el feto puede estar en quiescencia fisiológica.
+        </p>
+      </div>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Concepto central del Módulo 3</p>
+        <p className="text-white font-medium leading-relaxed">
+          "El cycling no es variabilidad. Es el signo más precoz de compromiso neurológico fetal y el más subestimado en la práctica clínica. Un feto que no cicla en 60 minutos, en cualquier contexto, requiere explicación — y si no la hay, requiere acción."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+// TOPIC_CONTENT definido DESPUÉS de todos los componentes T1–T12
 // para evitar React error #130 (componente undefined al evaluar JSX)
 const TOPIC_CONTENT: Record<string, React.ReactNode> = {
   t1: <T1Content />,
@@ -2531,6 +2805,10 @@ const TOPIC_CONTENT: Record<string, React.ReactNode> = {
   t6: <T6Content />,
   t7: <T7Content />,
   t8: <T8Content />,
+  t9: <T9Content />,
+  t10: <T10Content />,
+  t11: <T11Content />,
+  t12: <T12Content />,
 };
 
 const TheoryDocsView = ({ onBack, initialModule = 'm1' }: { onBack: () => void; initialModule?: string }) => {
