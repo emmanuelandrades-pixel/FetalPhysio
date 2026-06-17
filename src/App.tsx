@@ -3653,7 +3653,339 @@ const T19Content = () => (
   </div>
 );
 
-// TOPIC_CONTENT definido DESPUÉS de todos los componentes T1–T19
+// ─── MÓDULO 6: ACTUACIÓN CLÍNICA ─────────────────────────────────────────
+
+const T20Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      Ante cualquier alteración del CTG, la primera pregunta no es "¿intervengo quirúrgicamente?" sino <strong className="text-slate-800">"¿hay una causa reversible que pueda corregir ahora?"</strong> La actuación dirigida al mecanismo es más efectiva, menos invasiva y evita intervenciones innecesarias. El orden importa: identificar → corregir → reevaluar.
+    </p>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Plan de manejo según tipo de hipoxia (Chandraharan 2018)</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-xs">
+        <div className="grid grid-cols-3 bg-slate-800 text-white">
+          {['Tipo','Signos en CTG','Conducta'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Sin hipoxia','FCFb apropiada, variabilidad normal y cycling, sin desaceleraciones repetitivas','Evaluar si requiere continuar CTG. Si continúa: reevaluar cada hora','bg-emerald-50'],
+          ['Hipoxia crónica','FCFb mayor de lo esperado, variabilidad reducida/ausencia cycling, sin aceleraciones, desaceleraciones suaves o tardías','Evitar añadir estrés. Finalizar por vía rápida si el expulsivo no es inminente','bg-orange-50'],
+          ['Hipoxia progresiva — Compensada','Aumento FCFb (variabilidad conservada) precedido de desaceleraciones y ausencia de aceleraciones','Medidas conservadoras. Reevaluar cada 30–60 min. Identificar signos de empeoramiento','bg-amber-50'],
+          ['Hipoxia progresiva — Descompensada','Variabilidad reducida o aumentada, FCFb inestable o con disminución progresiva ("step ladder")','Retirar oxitocina/prostaglandinas. Tocólisis urgente. Si no mejora: finalizar por vía más rápida','bg-red-50'],
+          ['Hipoxia subaguda','Feto pasa más tiempo desacelerando que en línea basal. Puede presentar patrón saltatorio','Ver protocolo específico (Tema 21)','bg-orange-50'],
+          ['Hipoxia aguda','Desaceleración prolongada > 3 min','Regla de los 3 minutos (ver Tema 21)','bg-red-100'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${r[3]}`}>
+            {r.slice(0,3).map((c,j) => <div key={j} className="p-3 text-slate-700 border-r border-slate-100 last:border-0 leading-snug">{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Las 4 causas reversibles</h3>
+      <div className="space-y-3">
+        {[
+          { n:1, title:'Actividad uterina excesiva', subtitle:'Causa más frecuente', items:['Reducir o parar oxitocina','Retirar prostaglandinas si aplica','Tocólisis con agonistas beta-adrenérgicos (terbutalina) o nitroglicerina','En segunda fase: pedir a la madre que deje de pujar','Nota: Propess tiene larga semivida — su retirada suele requerir tocólisis simultánea'] },
+          { n:2, title:'Compresión aortocava', subtitle:'Decúbito supino', items:['Ocurre con decúbito supino','Colocar en decúbito lateral o incorporar a la madre'] },
+          { n:3, title:'Compresión transitoria de cordón', subtitle:'Desaceleraciones variables', items:['Cambios de posición materna'] },
+          { n:4, title:'Hipotensión materna brusca', subtitle:'Frecuente tras anestesia peridural o intradural', items:['Revertir con sueros ev ± efedrina (equipo anestésico)','Solo indicado ante hipotensión documentada'] },
+        ].map(card => (
+          <div key={card.n} className="bg-slate-800 text-white rounded-xl p-4 flex gap-4">
+            <span className="w-8 h-8 rounded-full bg-cyan-500 text-white font-black flex items-center justify-center shrink-0 text-sm">{card.n}</span>
+            <div className="flex-1">
+              <p className="font-bold text-white text-sm">{card.title}</p>
+              <p className="text-slate-400 text-xs mb-2">{card.subtitle}</p>
+              <ul className="space-y-1">
+                {card.items.map((item,j) => <li key={j} className="text-slate-300 text-xs flex items-start gap-1.5"><span className="text-cyan-400 mt-0.5 shrink-0">•</span>{item}</li>)}
+              </ul>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-red-50 border-l-4 border-red-500 rounded-r-xl p-4">
+      <p className="font-bold text-red-800 text-sm mb-2 flex items-center gap-2"><AlertTriangle size={16} className="shrink-0"/>Intervenciones sin evidencia — No recomendadas (Chandraharan 2018, sección 3.5)</p>
+      <div className="space-y-2">
+        <p className="text-red-700 text-sm">⛔ <strong>O₂ materno en madre bien oxigenada:</strong> no mejora la hipoxia fetal y puede ser perjudicial (Fawole and Hofmeyr 2012).</p>
+        <p className="text-red-700 text-sm">⛔ <strong>Sueroterapia ev en madre bien hidratada y normotensa:</strong> puede generar falsa impresión de recuperación sin mejorar resultados perinatales.</p>
+      </div>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "Identificar la causa es parte inseparable de la actuación. Una causa corregible tratada a tiempo evita la cesárea. Una causa no identificada ni corregida lleva a la intervención de todas formas, pero más tarde y con mayor daño."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const T21Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      La reanimación intrauterina tiene sentido cuando existe una <strong className="text-slate-800">causa corregible</strong>. No es una alternativa a la extracción cuando la reserva está agotada — es un puente que gana tiempo mientras se identifica y corrige el mecanismo, o mientras se prepara la extracción en paralelo.
+    </p>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Protocolo para hipoxia subaguda (Chandraharan 2018)</h3>
+      <div className="space-y-2 mb-4">
+        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Primera fase — Actuar sobre la dinámica</p>
+        {['Retirar prostaglandinas/oxitocina si aplica','Si no mejora: administrar tocólisis urgente','Si en 10–15 minutos no hay signos de mejoría: reevaluar y finalizar por la vía más rápida'].map((s,i) => (
+          <div key={i} className="flex items-start gap-3 bg-slate-800 text-white rounded-xl p-3">
+            <span className="w-6 h-6 rounded-full bg-cyan-500 text-white text-xs font-bold flex items-center justify-center shrink-0">{i+1}</span>
+            <span className="text-sm">{s}</span>
+          </div>
+        ))}
+      </div>
+      <div className="space-y-2">
+        <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Segunda fase — Si estamos en expulsivo</p>
+        {['Indicar cese de pujos durante las contracciones hasta objetivar mejoría fetal','Reiniciar pujos una vez estable','Si no mejora: tocólisis si expulsivo no es inminente, o parto instrumentado'].map((s,i) => (
+          <div key={i} className="flex items-start gap-3 bg-slate-700 text-white rounded-xl p-3">
+            <span className="w-6 h-6 rounded-full bg-blue-400 text-white text-xs font-bold flex items-center justify-center shrink-0">{i+1}</span>
+            <span className="text-sm">{s}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Mecanismo → Intervención → Evidencia</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-xs">
+        <div className="grid grid-cols-3 bg-slate-800 text-white">
+          {['Causa identificada','Intervención','Según Chandraharan'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Taquisistolia / hiperestimulación','Reducir/parar oxitocina + tocólisis si persiste','✅ Evidencia sólida','bg-emerald-50'],
+          ['Compresión aortocava','Decúbito lateral / incorporar','✅ Estándar','bg-emerald-50'],
+          ['Compresión cordón (variables)','Cambio de posición','✅ Estándar','bg-emerald-50'],
+          ['Hipotensión materna','Sueros ev ± efedrina','✅ Ante hipotensión documentada','bg-emerald-50'],
+          ['O₂ materno en normoxia','—','❌ Sin evidencia. Potencialmente perjudicial','bg-red-50'],
+          ['Sueros en normohidratada normotensa','—','❌ Sin evidencia de beneficio','bg-red-50'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${r[3]}`}>
+            {r.slice(0,3).map((c,j) => <div key={j} className="p-3 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">La Regla de los 3 Minutos (Chandraharan 2018)</h3>
+      <div className="relative mb-2">
+        <div className="flex justify-between">
+          {[
+            { time:'0–3 min', icon:'🆘', action:'Solicitar ayuda', color:'bg-emerald-500' },
+            { time:'3–6 min', icon:'🔍', action:'Diagnosticar causa\nExcluir 3 accidentes*', color:'bg-amber-500' },
+            { time:'6–9 min', icon:'📊', action:'Signos de recuperación\nSi no: prep. parto inm.', color:'bg-orange-500' },
+            { time:'9–12 min', icon:'🏥', action:'Maniobras parto\ninstrumentado o cesárea', color:'bg-red-500' },
+            { time:'12–15 min', icon:'👶', action:'OBJETIVO:\nNACIMIENTO', color:'bg-red-800' },
+          ].map((step,i) => (
+            <div key={i} className="flex flex-col items-center flex-1">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${step.color} text-white shadow-md`}>{step.icon}</div>
+              <p className="text-xs font-bold text-slate-700 mt-2">{step.time}</p>
+              <p className="text-xs text-slate-500 text-center whitespace-pre-line leading-tight mt-0.5">{step.action}</p>
+            </div>
+          ))}
+        </div>
+        <div className="absolute top-5 left-5 right-5 h-0.5 bg-gradient-to-r from-emerald-500 via-amber-500 via-orange-500 to-red-800 -z-10"/>
+      </div>
+      <p className="text-xs text-slate-500 italic mt-4">*Los 3 accidentes mayores: prolapso de cordón, desprendimiento placentario, rotura uterina.</p>
+    </div>
+
+    <div className="bg-red-50 border border-red-300 rounded-xl p-4">
+      <p className="font-bold text-red-800 text-sm mb-2 flex items-center gap-2"><AlertTriangle size={16} className="shrink-0 text-red-600"/>Excepción crítica — Chandraharan 2018</p>
+      <p className="text-red-700 text-sm leading-relaxed">
+        La Regla de los 3 minutos <strong>NO debe seguirse</strong> si la desaceleración es precedida de reducción de la variabilidad y hubiera ausencia de cycling. En este caso se deben realizar maniobras para finalizar de la forma más rápida y segura posible. <span className="text-red-500 text-xs">(Williams and Galerneau 2002)</span>
+      </p>
+    </div>
+
+    <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+      <p className="font-bold text-emerald-800 text-sm mb-2">Dato estadístico (Chandraharan 2018)</p>
+      <p className="text-emerald-700 text-sm leading-relaxed">
+        Si previamente a la desaceleración se identifican períodos de cycling y la variabilidad es normal antes y durante los 3 primeros minutos de la desaceleración, el <strong>90% se recuperarán antes de 6 minutos</strong> y el <strong>95% antes de 9 minutos</strong>, siempre que los accidentes mayores hayan sido excluidos.
+      </p>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "La reanimación intrauterina es más efectiva cuando se aplica temprano — cuando la reserva aún está presente. Ante variabilidad ausente y cycling ausente, no hay reserva que ganar tiempo: el único tratamiento es la extracción."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const T22Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      Escalar no significa intervenir de inmediato — significa <strong className="text-slate-800">prepararse para intervenir mientras se sigue intentando evitarlo</strong>. La preparación en paralelo (alertar al equipo, preparar pabellón, informar a la madre) no impide continuar las medidas conservadoras y salva tiempo decisivo cuando el trazado se deteriora.
+    </p>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Disparadores de escalamiento (Chandraharan 2018)</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-xs">
+        <div className="grid grid-cols-3 bg-slate-800 text-white">
+          {['Hallazgo CTG','Nivel de alerta','Acción'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['FCFb apropiada + variabilidad normal + cycling + sin desacel. repetitivas','Sin hipoxia','Reevaluar cada hora','bg-emerald-50'],
+          ['Aumento FCFb + variabilidad conservada + desacel. + sin aceleraciones','Hipoxia progresiva compensada','Medidas conservadoras + reevaluar 30–60 min','bg-amber-50'],
+          ['Variabilidad reducida o aumentada + FCFb inestable','Hipoxia descompensada','Alerta equipo + tocólisis + preparar extracción','bg-orange-50'],
+          ['Desaceleración prolongada > 3 min con variabilidad normal + cycling previo','Hipoxia aguda con reserva','Regla de los 3 min','bg-red-50'],
+          ['Desaceleración prolongada precedida de variabilidad reducida / sin cycling','Hipoxia aguda sin reserva','Extracción inmediata — no aplicar Regla de los 3 min','bg-red-100'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${r[3]}`}>
+            {r.slice(0,3).map((c,j) => <div key={j} className={`p-3 text-slate-700 border-r border-slate-100 last:border-0 ${j===2&&i===4?'font-bold text-red-700':''}`}>{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Checklist de exclusión de hipoxia crónica (Chandraharan 2018)</h3>
+      <div className="rounded-xl border border-slate-200 overflow-hidden">
+        {[
+          { label:'FCFb adecuada para la edad gestacional' },
+          { label:'Variabilidad normal y presencia de cycling' },
+          { label:'Presencia de aceleraciones (no obligatorio en trabajo de parto activo)' },
+          { label:'Ausencia de desaceleraciones suaves o tardías' },
+          { label:'Contexto clínico: sin meconio, sin fiebre, crecimiento fetal normal, sin reducción de movimientos fetales' },
+        ].map((item,i) => (
+          <div key={i} className={`flex items-start gap-3 p-4 ${i%2?'bg-slate-50':'bg-white'} ${i<4?'border-b border-slate-100':''}`}>
+            <span className="text-emerald-500 text-lg shrink-0">☑</span>
+            <div>
+              <span className="text-xs font-bold text-slate-500 mr-2">{i+1}.</span>
+              <span className="text-sm text-slate-700">{item.label}</span>
+            </div>
+          </div>
+        ))}
+        <div className="bg-amber-50 border-t border-amber-200 p-3">
+          <p className="text-xs text-amber-700">Si algún ítem es negativo → <strong>considerar hipoxia crónica preexistente</strong> y ajustar umbrales de interpretación.</p>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Principios de comunicación y escalamiento</h3>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { icon:'🎯', title:'Anticipar, no reaccionar', desc:'El escalamiento debe iniciarse cuando la reserva está disminuyendo — no cuando ya está agotada.' },
+          { icon:'📣', title:'Comunicar antes de la emergencia', desc:'Un equipo alertado tiene tiempo de prepararse. Usar SBAR cuando hay deterioro del trazado.' },
+          { icon:'⏱️', title:'Definir el tiempo límite', desc:'"Si en 15 minutos no hay mejoría objetiva del trazado, procedemos" es una decisión clínica. "Esperemos a ver" no lo es.' },
+          { icon:'📝', title:'Documentar todo con hora', desc:'Hora de cada hallazgo, intervención realizada, respuesta observada. La documentación es evidencia clínica y legal.' },
+        ].map((p,i) => (
+          <div key={i} className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <p className="text-xl mb-1">{p.icon}</p>
+            <p className="font-bold text-slate-800 text-xs mb-1">{p.title}</p>
+            <p className="text-xs text-slate-600 leading-relaxed">{p.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "El equipo que no está informado no puede ayudar. Comunicar el deterioro del trazado cuando comienza — no cuando ya es emergencia — es la diferencia entre una cesárea organizada y una cesárea caótica."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const ERROR_COLORS: Record<string, string> = {
+  red: 'bg-red-100 border-red-300',
+  amber: 'bg-amber-100 border-amber-300',
+  blue: 'bg-blue-100 border-blue-300',
+  slate: 'bg-slate-100 border-slate-300',
+};
+const ERROR_DOT: Record<string, string> = {
+  red: 'bg-red-500', amber: 'bg-amber-500', blue: 'bg-blue-500', slate: 'bg-slate-500',
+};
+
+const T23Content = () => {
+  const errors = [
+    { n:1,  color:'red',   title:'"Se ve feo, intervengo"',                     desc:'Decidir basándose en la apariencia visual del trazado sin analizar el mecanismo.', fix:'La apariencia no es un criterio clínico. Desaceleraciones profundas con variabilidad normal y cycling presente son menos preocupantes que un trazado "tranquilo" con variabilidad ausente.', consequence:'Sobreintervención. Cesáreas innecesarias.' },
+    { n:2,  color:'red',   title:'Solo mirar los últimos 10 minutos',           desc:'Evaluar el trazado en ventana corta sin revisar la evolución completa.', fix:'La tendencia temporal contiene más información que cualquier fotograma aislado. La hipoxia progresiva solo se reconoce en la película completa.', consequence:'Retraso diagnóstico. Intervención tardía cuando la reserva ya está agotada.' },
+    { n:3,  color:'amber', title:'"Está durmiendo" ante cualquier variabilidad reducida', desc:'Atribuir automáticamente la variabilidad reducida a ciclo de sueño.', fix:'La quiescencia fisiológica dura hasta 50 min (Chandraharan 2018), se resuelve espontáneamente o con estimulación, y no se acompaña de taquicardia ni desaceleraciones. Es diagnóstico de exclusión, no el diagnóstico por defecto.', consequence:'Falsa tranquilidad. Retraso en el diagnóstico de compromiso real.' },
+    { n:4,  color:'amber', title:'No buscar el cycling',                        desc:'Evaluar solo variabilidad puntual sin buscar la alternancia de estados conductuales.', fix:'El cycling puede perderse antes de que la variabilidad se reduzca. Es la primera señal de compromiso neurológico progresivo. Solo evaluable en ventanas de ≥ 30–60 min.', consequence:'Pérdida de la señal de alarma más precoz.' },
+    { n:5,  color:'amber', title:'Ausencia de aceleraciones = compromiso fetal', desc:'Interpretar la ausencia de aceleraciones como signo de compromiso independientemente del contexto.', fix:'Las aceleraciones pueden estar ausentes hasta 50 min en fetos sanos (quiescencia). Su ausencia solo adquiere significado junto a variabilidad reducida, pérdida de cycling o sin respuesta a estimulación.', consequence:'Sobreintervención ante un hallazgo frecuentemente fisiológico.' },
+    { n:6,  color:'amber', title:'Subestimar las tardías superficiales',        desc:'Minimizar las tardías de pequeña amplitud (< 15 lpm) porque "no se ven profundas".', fix:'En hipoxia crónica, las tardías superficiales con variabilidad mínima son más preocupantes que tardías profundas con variabilidad conservada. La pequeña amplitud refleja incapacidad de generar respuesta vagal enérgica — no un problema menor. (Chandraharan 2018)', consequence:'Falsa tranquilidad ante uno de los signos más graves en hipoxia crónica.' },
+    { n:7,  color:'blue',  title:'Evaluar la variabilidad durante la desaceleración', desc:'Evaluar la variabilidad en el nadir de la desaceleración en lugar de en los segmentos entre desaceleraciones.', fix:'La variabilidad diagnósticamente relevante es la que existe entre desaceleraciones (en la línea basal). Durante el nadir, el reflejo vagal frena el nodo sinusal — la variabilidad ahí no refleja el estado neurológico basal.', consequence:'Sobreestimación de la gravedad o falsa tranquilidad en el período incorrecto.' },
+    { n:8,  color:'blue',  title:'No buscar la causa de la alteración',         desc:'Ante un trazado alterado, proceder directamente a la intervención sin identificar el mecanismo.', fix:'Identificar la causa es el primer acto clínico obligatorio. Taquisistolia → suspender oxitocina es la intervención más rápida y efectiva. Sin identificar la causa, se trata el síntoma sin resolver el problema.', consequence:'Cesáreas evitables. Pérdida de oportunidad de corregir causas reversibles.' },
+    { n:9,  color:'blue',  title:'Interpretar sin contexto clínico',            desc:'Leer el trazado de forma aislada, sin considerar EG, patología materna, fármacos, progresión del parto.', fix:'El mismo trazado tiene significados diferentes según el contexto. Una FCFb de 170 lpm en paciente afebril es diferente a la misma FCFb en corioamnionitis con RCIU. El contexto clínico es el primer paso (Chandraharan 2018).', consequence:'Sobreintervención en contextos tranquilizadores y subintervención en fetos de alto riesgo.' },
+    { n:10, color:'slate', title:'No documentar',                               desc:'Observar el trazado, tomar decisiones e intervenir sin dejar registro escrito.', fix:'La documentación es parte del proceso diagnóstico. Registrar la hora de cada hallazgo permite evaluar la tendencia temporal. Chandraharan 2018 incluye documentación como elemento obligatorio de la monitorización.', consequence:'Pérdida de información para evaluación temporal. Vulnerabilidad ante eventos adversos.' },
+    { n:11, color:'slate', title:'"Estaba bien hace una hora, sigue bien ahora"', desc:'Minimizar hallazgos actuales porque el trazado previo era normal.', fix:'Un trazado normal previo establece que la reserva era adecuada en ese momento — no garantiza el estado actual. La hipoxia progresiva puede deteriorar la reserva en horas. El trazado previo es referencia de tendencia, no garantía presente.', consequence:'Retraso diagnóstico por falsa seguridad en datos históricos.' },
+    { n:12, color:'slate', title:'Recuperar la FCF = feto recuperado',          desc:'Concluir bienestar fetal porque la FCF recuperó la línea basal tras una desaceleración.', fix:'La recuperación de la FCF indica que el reflejo vagal ha cesado — no que el feto haya recuperado su oxigenación. Chandraharan 2018 establece que la variabilidad en el período inmediatamente posterior es el parámetro más informativo sobre el estado real del feto.', consequence:'Falsa tranquilidad post-episodio. Retraso en decisión de extracción.' },
+    { n:13, color:'red',   title:'Confundir FCF materna con fetal',             desc:'Monitorizar inadvertidamente la FC materna durante una bradicardia fetal severa.', fix:'Durante una bradicardia fetal severa, el transductor puede captar la señal materna (60–100 lpm), confundiéndola con "recuperación parcial". Regla: palpar el pulso materno simultáneamente con la lectura del monitor cuando la FCF sea anormal. (Chandraharan 2018)', consequence:'Falsa seguridad ante una emergencia real. Retraso catastrófico en la extracción.' },
+  ];
+
+  return (
+    <div className="space-y-8">
+      <p className="text-slate-600 leading-relaxed">
+        Los errores más frecuentes no son de conocimiento sino de proceso: se mira el trazado en el momento equivocado, con la pregunta equivocada, o sin integrar el contexto. Los <strong className="text-slate-800">13 errores que siguen son sistemáticos</strong> — ocurren en profesionales de todos los niveles de experiencia.
+      </p>
+
+      <div className="space-y-3">
+        {errors.map(err => (
+          <div key={err.n} className={`rounded-xl border ${ERROR_COLORS[err.color]} p-4`}>
+            <div className="flex items-start gap-3">
+              <div className="flex items-center gap-2 shrink-0">
+                <span className={`w-7 h-7 rounded-full ${ERROR_DOT[err.color]} text-white text-xs font-black flex items-center justify-center`}>{err.n}</span>
+              </div>
+              <div className="flex-1 space-y-2">
+                <p className="font-bold text-slate-800 text-sm">{err.title}</p>
+                <div className="grid grid-cols-3 gap-3 text-xs">
+                  <div>
+                    <p className="font-bold text-slate-500 uppercase tracking-wide text-xs mb-0.5">Error</p>
+                    <p className="text-slate-700 leading-snug">{err.desc}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-500 uppercase tracking-wide text-xs mb-0.5">Corrección</p>
+                    <p className="text-slate-700 leading-snug">{err.fix}</p>
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-500 uppercase tracking-wide text-xs mb-0.5">Consecuencia</p>
+                    <p className="text-slate-700 leading-snug">{err.consequence}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-slate-900 text-white rounded-2xl p-6">
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-3">El antídoto universal</p>
+        <p className="text-white leading-relaxed">
+          El antídoto universal para todos los errores descritos es el mismo: aplicar el razonamiento fisiopatológico estructurado en cada evaluación — no solo cuando el trazado "parece difícil". Ante cada CTG, la misma pregunta: <strong className="text-cyan-300">¿qué mecanismo genera esto y cuál es la reserva fetal?</strong> La consistencia es lo que previene los errores sistemáticos.
+        </p>
+      </div>
+
+      <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+        <span className="text-2xl shrink-0">💎</span>
+        <div>
+          <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+          <p className="text-white font-medium leading-relaxed">
+            "El CTG más peligroso no es el que se ve feo — es el que se ve tranquilo en un feto que no lo está. Y el error más frecuente no es de conocimiento: es no hacer la pregunta correcta en el momento correcto."
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// TOPIC_CONTENT definido DESPUÉS de todos los componentes T1–T23
 // para evitar React error #130 (componente undefined al evaluar JSX)
 const TOPIC_CONTENT: Record<string, React.ReactNode> = {
   t1: <T1Content />,
@@ -3675,6 +4007,10 @@ const TOPIC_CONTENT: Record<string, React.ReactNode> = {
   t17: <T17Content />,
   t18: <T18Content />,
   t19: <T19Content />,
+  t20: <T20Content />,
+  t21: <T21Content />,
+  t22: <T22Content />,
+  t23: <T23Content />,
 };
 
 const TheoryDocsView = ({ onBack, initialModule = 'm1' }: { onBack: () => void; initialModule?: string }) => {
