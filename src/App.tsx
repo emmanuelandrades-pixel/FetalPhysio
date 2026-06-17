@@ -2794,7 +2794,516 @@ const T12Content = () => (
   </div>
 );
 
-// TOPIC_CONTENT definido DESPUÉS de todos los componentes T1–T12
+// ─── MÓDULO 4: FISIOPATOLOGÍA DE LA HIPOXIA ───────────────────────────────
+
+const CFG_OXIGENACION_NORMAL = { baseline:138, variability:14, accels:true,  cycling:true,  decelType:'none',               contractions:[3,7] };
+const CFG_HIPOXIA_COMPENSADA = { baseline:150, variability:12, accels:false, cycling:false, decelType:'variable',           contractions:[2,5,8] };
+const CFG_HIPOXIA_AGUDA      = { baseline:145, variability:10, accels:false, cycling:false, decelType:'terminal_bradycardia',contractions:[2,6] };
+const CFG_HIPOXIA_SUBAGUDA   = { baseline:155, variability:6,  accels:false, cycling:false, decelType:'variable',           contractions:[1,2.5,4,5.5,7,8.5] };
+const CFG_HIPOXIA_LENTA      = { baseline:162, variability:4,  accels:false, cycling:false, decelType:'late',               contractions:[2,5,8] };
+const CFG_HIPOXIA_CRONICA    = { baseline:165, variability:2,  accels:false, cycling:false, decelType:'shallow_late',       contractions:[2,5,8] };
+
+const T13Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      El feto vive en condiciones de oxigenación que serían intolerables para un adulto (PaO₂ 20–30 mmHg). Lo que lo protege no es el oxígeno abundante sino la <strong className="text-slate-800">eficiencia de sus sistemas</strong>: hemoglobina fetal de alta afinidad, redistribución circulatoria y reservas glucogénicas. Entender esta cadena permite comprender por qué ciertos fetos toleran mejor el estrés hipóxico intraparto.
+    </p>
+
+    <MiniCTG config={CFG_OXIGENACION_NORMAL} label="Feto bien oxigenado — CTG normal"
+      caption="Basal estable, variabilidad normal, aceleraciones presentes. Expresión de una cadena de oxigenación fetal íntegra." />
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Cadena de oxigenación fetal</h3>
+      <div className="space-y-2">
+        {[
+          { icon:'🫁', label:'Pulmón materno',        value:'PaO₂ ~100 mmHg',   detail:'Punto de partida',                                        color:'bg-cyan-50 border-cyan-200' },
+          { icon:'🩸', label:'Espacio intervelloso',  value:'PO₂ ~40–50 mmHg',  detail:'Ya reducida respecto a circulación materna',               color:'bg-blue-50 border-blue-200' },
+          { icon:'🧬', label:'HbF capta O₂',          value:'Sat. ~70%',         detail:'Alta afinidad — curva desplazada a la izquierda',          color:'bg-violet-50 border-violet-200' },
+          { icon:'💓', label:'Circulación fetal',      value:'PaO₂ ~20–30 mmHg', detail:'"Hipoxia" que el feto tolera perfectamente',               color:'bg-amber-50 border-amber-200' },
+          { icon:'🧠', label:'Distribución tisular',   value:'Prioriza cerebro',  detail:'Brain-sparing activo incluso en normoxia',                 color:'bg-orange-50 border-orange-200' },
+          { icon:'⚡', label:'Metabolismo celular',    value:'Aerobio',           detail:'Mitocondrias fetales eficientes a baja PO₂',               color:'bg-emerald-50 border-emerald-200' },
+        ].map((step, i, arr) => (
+          <div key={i}>
+            <div className={`rounded-xl border p-3 flex items-center gap-4 ${step.color}`}>
+              <span className="text-2xl shrink-0">{step.icon}</span>
+              <div className="flex-1">
+                <p className="font-bold text-slate-800 text-sm">{step.label}</p>
+                <p className="text-slate-600 text-xs">{step.detail}</p>
+              </div>
+              <span className="text-xs font-mono bg-white border border-slate-200 rounded-lg px-3 py-1 text-slate-700 shrink-0">{step.value}</span>
+            </div>
+            {i < arr.length-1 && <div className="flex justify-center py-1 text-slate-400 text-lg">↓</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Reservas de oxígeno fetal</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-sm">
+        <div className="grid grid-cols-3 bg-slate-800 text-white text-xs">
+          {['Fuente de reserva','Capacidad','Duración estimada'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Hemoglobina fetal circulante','~70% de la reserva total','1–2 minutos'],
+          ['Mioglobina muscular','~15%','Segundos'],
+          ['O₂ disuelto en plasma','~15%','Segundos'],
+          ['Glucógeno cardíaco (anaerobia)','Variable','2–5 min adicionales'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-3 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-4">
+      <p className="font-bold text-cyan-800 text-sm mb-2">Por qué el feto tolera las contracciones</p>
+      <p className="text-cyan-700 text-sm leading-relaxed">
+        Cada contracción reduce transitoriamente la PaO₂ fetal. El feto usa sus reservas de hemoglobina durante la caída y las repone durante la relajación. Con hasta 5 contracciones en 10 min y relajación completa entre ellas, el feto sano nunca se queda sin reserva.
+      </p>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "El feto vive en hipoxia relativa permanente. Lo que lo protege no es el oxígeno abundante sino la eficiencia de sus sistemas. Una desaceleración de 60 segundos en un feto sano no produce daño — el feto tiene reserva suficiente para ese período."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const T14Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      La hipoxia intraparto no es un evento único. Es un <strong className="text-slate-800">espectro de 4 tipos</strong> con velocidades de instalación, mecanismos y conductas radicalmente distintos. Confundirlos es el error más costoso en obstetricia. El CTG puede diferenciarlos si se interpreta con conocimiento fisiopatológico.
+    </p>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Tabla comparativa — Los 4 tipos de hipoxia</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-xs">
+        <div className="grid grid-cols-5 bg-slate-800 text-white">
+          {['Dimensión','🟢 Fisiológica','🟡 Lentamente evolutiva','🟠 Subaguda','🔴 Aguda'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Velocidad','Transitoria','Horas','Minutos','Segundos'],
+          ['Mecanismo','↓ Perfusión transitoria','Insuf. uteroplacentaria','Acumulación CO₂','Interrupción brusca flujo'],
+          ['Desaceleraciones','Ausentes o barorreceptoras','Tardías recurrentes','Variables prolongadas','Bradicardia terminal'],
+          ['Variabilidad','Normal','Progresivamente reducida','Reducida en desacel.','Ausente'],
+          ['Ciclado','Presente','Precozmente ausente','Ausente','Ausente'],
+          ['Taquicardia','No','Sí, progresiva','Posible','No (bradicardia)'],
+          ['Ventana terapéutica','N/A','Horas','Minutos','< 3 minutos'],
+          ['Conducta','Observar','Evaluar reserva','Actuar sobre dinámica','Protocolo 15 min'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-5 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className={`p-3 border-r border-slate-100 last:border-0 ${j===0?'font-semibold text-slate-700':j===1?'text-emerald-700':j===2?'text-amber-700':j===3?'text-orange-700':'text-red-700'}`}>{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Espectro de progresión</h3>
+      <div className="grid grid-cols-4 gap-2">
+        {[
+          { label:'Fisiológica', time:'Transitoria', color:'bg-emerald-100 border-emerald-300', dot:'bg-emerald-500', text:'text-emerald-800' },
+          { label:'Lentamente evolutiva', time:'Horas', color:'bg-amber-100 border-amber-300', dot:'bg-amber-500', text:'text-amber-800' },
+          { label:'Subaguda', time:'Minutos', color:'bg-orange-100 border-orange-300', dot:'bg-orange-500', text:'text-orange-800' },
+          { label:'Aguda', time:'Segundos', color:'bg-red-100 border-red-300', dot:'bg-red-500', text:'text-red-800' },
+        ].map((s,i) => (
+          <div key={i} className={`rounded-xl border p-4 text-center ${s.color}`}>
+            <div className={`w-4 h-4 rounded-full mx-auto mb-2 ${s.dot}`}/>
+            <p className={`font-bold text-sm ${s.text}`}>{s.label}</p>
+            <p className={`text-xs mt-1 ${s.text} opacity-80`}>{s.time}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex items-center mt-2 px-4">
+        <div className="flex-1 h-1 bg-gradient-to-r from-emerald-400 via-amber-400 via-orange-400 to-red-500 rounded-full"/>
+      </div>
+    </div>
+
+    <div className="bg-slate-800 text-white rounded-xl p-5">
+      <p className="font-bold text-cyan-400 text-sm mb-2 uppercase tracking-widest">Principio fundamental</p>
+      <p className="text-white leading-relaxed">
+        El tipo de hipoxia determina la conducta. No existe una respuesta universal ante "el CTG alterado". Identificar el mecanismo es el primer acto clínico obligatorio. La velocidad de instalación es el primer dato diagnóstico.
+      </p>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "No toda hipoxia es igual. El tipo determina la conducta. Un error frecuente es tratar la hipoxia lentamente evolutiva con la urgencia de una hipoxia aguda — generando cesáreas innecesarias. Y el error inverso: tratar una hipoxia aguda con la calma de una evolutiva — generando daño neurológico."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const T15Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      La situación de mayor urgencia en obstetricia. Interrupción brusca del intercambio gaseoso (prolapso de cordón, rotura uterina, desprendimiento masivo). El feto pasa de normalidad a hipoxia severa en segundos. No hay tiempo para compensación secuencial. La <strong className="text-slate-800">ventana para evitar daño neurológico es de 10–15 minutos</strong> desde el inicio.
+    </p>
+
+    <MiniCTG config={CFG_HIPOXIA_AGUDA} label="Hipoxia aguda — Bradicardia terminal" duration={20}
+      caption="Trazado normal hasta el minuto 12, luego caída súbita y sostenida sin recuperación. FCF < 80 lpm mantenida. Evento centinela. Protocolo de 15 minutos." />
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Causas principales</h3>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { title:'Prolapso de cordón', items:['Compresión mecánica total del cordón','Bradicardia súbita al amniorrexis','Tacto vaginal: cordón palpable'] },
+          { title:'Rotura uterina', items:['Hemorragia masiva materna y fetal','Dolor agudo + sangrado + bradicardia','Contexto TOLAC o cirugía uterina previa'] },
+          { title:'Desprendimiento placentario masivo', items:['Pérdida súbita intercambio gaseoso','Dolor + hemorragia + útero leñoso'] },
+          { title:'Compresión severa de cordón', items:['Oclusión completa vasos umbilicales','Variables muy prolongadas sin recuperación'] },
+        ].map((card,i) => (
+          <div key={i} className="bg-red-50 border border-red-200 rounded-xl p-4">
+            <p className="font-bold text-red-800 text-sm mb-2">🔴 {card.title}</p>
+            <ul className="space-y-1">
+              {card.items.map((item,j) => <li key={j} className="text-red-700 text-xs flex items-start gap-1"><span className="mt-0.5 shrink-0">•</span>{item}</li>)}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Regla de los 15 minutos</h3>
+      <div className="relative">
+        <div className="flex justify-between mb-2">
+          {[
+            { time:'3 min', icon:'⏱️', action:'Evaluar\nReanimar', color:'bg-emerald-500' },
+            { time:'6 min', icon:'⚡', action:'Decidir\nextracción', color:'bg-amber-500' },
+            { time:'9 min', icon:'🏥', action:'Pabellón\nMovilizar', color:'bg-orange-500' },
+            { time:'12 min',icon:'🔪', action:'Incisión\nIniciar', color:'bg-red-500' },
+            { time:'15 min',icon:'👶', action:'NACIMIENTO\nobjetivo', color:'bg-red-800' },
+          ].map((step,i) => (
+            <div key={i} className="flex flex-col items-center flex-1">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg ${step.color} text-white font-bold shadow-md`}>{step.icon}</div>
+              <p className="text-xs font-bold text-slate-700 mt-2">{step.time}</p>
+              <p className="text-xs text-slate-500 text-center whitespace-pre-line leading-tight mt-0.5">{step.action}</p>
+            </div>
+          ))}
+        </div>
+        <div className="absolute top-5 left-5 right-5 h-0.5 bg-gradient-to-r from-emerald-500 via-amber-500 via-orange-500 to-red-800 -z-10"/>
+      </div>
+      <p className="text-xs text-slate-500 text-center mt-4 italic">La lesión neurológica progresa rápidamente más allá de este umbral. El objetivo es el nacimiento, no llegar al límite de 15 minutos.</p>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Tiempo y estado fetal probable</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-sm">
+        <div className="grid grid-cols-2 bg-slate-800 text-white text-xs">
+          {['Tiempo desde hipoxia aguda','Estado fetal probable'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['0–3 min','Compensación máxima — cerebro protegido','bg-emerald-50'],
+          ['3–6 min','Glucógeno cardíaco en uso — reserva presente','bg-amber-50'],
+          ['6–10 min','Acidosis metabólica progresiva — riesgo neurológico','bg-orange-50'],
+          ['> 10–15 min','Daño neurológico probable','bg-red-100'],
+          ['> 20 min','Daño neurológico severo muy probable','bg-red-200'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-2 ${r[2]}`}>
+            <div className="p-3 text-slate-700 border-r border-slate-200 font-mono text-xs">{r[0]}</div>
+            <div className="p-3 text-slate-700 text-xs">{r[1]}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-red-50 border-l-4 border-red-500 rounded-r-xl p-4 flex items-start gap-3">
+      <AlertTriangle size={18} className="text-red-600 shrink-0 mt-0.5"/>
+      <p className="text-red-700 text-sm leading-relaxed">
+        <strong>Reanimación intrauterina y preparación para extracción no son alternativas — son simultáneas.</strong> Cambio de posición, suspender oxitocina y fluidos se aplican mientras el equipo se moviliza hacia pabellón.
+      </p>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "En hipoxia aguda, el tiempo es cerebro fetal. Cada minuto de demora es daño potencial. La bradicardia que no recupera en 3 minutos no es una desaceleración prolongada — es un evento centinela. Activar el protocolo sin esperar más signos."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const T16Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      La más frecuentemente subestimada y la más frecuentemente <strong className="text-slate-800">iatrogénica</strong>. Ocurre cuando las desaceleraciones son tan frecuentes o prolongadas que el tiempo de recuperación entre ellas es insuficiente. El CO₂ se acumula entre contracciones y el pH puede caer <strong className="text-slate-800">~0.01 cada 2–3 minutos</strong> — mucho más rápido que en la hipoxia lenta. Causa más frecuente: taquisistolia por uso inadecuado de uterotónicos.
+    </p>
+
+    <MiniCTG config={CFG_HIPOXIA_SUBAGUDA} label="Hipoxia subaguda — Taquisistolia con variables recurrentes"
+      caption="Más de 5 contracciones en 10 minutos. Variables con recuperación incompleta. El feto no tiene tiempo de restaurar su PaO₂ entre desaceleraciones. pH cae ~0.01 cada 2–3 min." />
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Acumulación de hipoxia por contracciones consecutivas</h3>
+      <div className="flex items-stretch gap-2">
+        {[
+          { label:'Contracción 1', desc:'FCF cae → recupera (incompleta)', status:'PaO₂ parcialmente reducida', color:'bg-amber-50 border-amber-200', text:'text-amber-800' },
+          { label:'Contracción 2', desc:'FCF parte ya reducida → cae más → recuperación aún más incompleta', status:'CO₂ acumulado', color:'bg-orange-50 border-orange-200', text:'text-orange-800' },
+          { label:'Contracción N', desc:'FCF no recupera la basal → acidosis en instalación', status:'Intervenir AHORA', color:'bg-red-50 border-red-200', text:'text-red-800' },
+        ].map((step, i, arr) => (
+          <div key={i} className="flex items-center gap-2 flex-1">
+            <div className={`rounded-xl border p-3 flex-1 ${step.color}`}>
+              <p className={`font-bold text-xs mb-1 ${step.text}`}>{step.label}</p>
+              <p className={`text-xs leading-snug mb-2 ${step.text} opacity-80`}>{step.desc}</p>
+              <span className={`text-xs font-bold ${step.text} bg-white bg-opacity-60 rounded-lg px-2 py-0.5`}>{step.status}</span>
+            </div>
+            {i < arr.length-1 && <span className="text-slate-400 text-xl shrink-0">→</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Señales de alarma progresivas</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-sm">
+        <div className="grid grid-cols-3 bg-slate-800 text-white text-xs">
+          {['Señal','Significado','Urgencia'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Variables > 60 seg','Acumulación CO₂ comienza','⚠️ Vigilar'],
+          ['Recuperación incompleta a la basal','El feto no repone PaO₂ entre contracciones','⚠️ Actuar'],
+          ['Taquicardia post-desaceleración','Activación simpática compensatoria','🔴 Urgente'],
+          ['Pérdida del ciclado','Compromiso cortical iniciando','🔴 Urgente'],
+          ['Variabilidad progresivamente reducida','Reserva en agotamiento','🔴 Emergencia'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-3 text-slate-700 border-r border-slate-100 last:border-0 text-xs">{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Protocolo de actuación</h3>
+      <div className="space-y-2">
+        {[
+          { n:1, title:'Suspender oxitocina', desc:'Intervención más efectiva y más rápida' },
+          { n:2, title:'Cambio de posición', desc:'Lateral izquierda o genupectoral' },
+          { n:3, title:'Hidratación ev', desc:'Bolo de cristaloides' },
+          { n:4, title:'Tocólisis aguda', desc:'Si dinámica no cede (terbutalina / atosibán)' },
+          { n:5, title:'Reevaluar en 10–15 min', desc:'Si no mejora: preparar extracción' },
+        ].map(step => (
+          <div key={step.n} className="bg-slate-800 text-white rounded-xl p-4 flex items-center gap-4">
+            <span className="w-8 h-8 rounded-full bg-cyan-500 text-white font-bold flex items-center justify-center shrink-0 text-sm">{step.n}</span>
+            <div>
+              <p className="font-bold text-white text-sm">{step.title}</p>
+              <p className="text-slate-400 text-xs">{step.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+      <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5"/>
+      <div>
+        <p className="font-bold text-amber-800 text-sm mb-1">Velocidad de deterioro</p>
+        <p className="text-amber-700 text-sm leading-relaxed">
+          El pH fetal puede caer <strong>~0.01 unidades cada 2–3 minutos</strong> en hipoxia subaguda severa. En 20 minutos, un feto puede pasar de pH normal a acidosis significativa (pH &lt; 7.00).
+        </p>
+      </div>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "La hipoxia subaguda es la que más se subestima y la más frecuentemente iatrogénica. Una oxitocina mal dosificada puede producir en minutos lo que la enfermedad tarda horas en generar. Suspender la oxitocina es la intervención más rápida, más barata y más efectiva."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const T17Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      La forma más frecuente de compromiso fetal intraparto. Se desarrolla en <strong className="text-slate-800">horas</strong>. El feto activa mecanismos compensatorios secuenciales que el CTG documenta progresivamente. Es la única forma de hipoxia donde la "película completa" del trazado tiene más valor diagnóstico que cualquier fotograma aislado. Substrato más frecuente: <strong className="text-slate-800">insuficiencia uteroplacentaria</strong>.
+    </p>
+
+    <MiniCTG config={CFG_HIPOXIA_LENTA} label="Hipoxia lentamente evolutiva — Tardías con taquicardia"
+      caption="Tardías recurrentes en cada contracción. Taquicardia compensatoria. Variabilidad que se reduce progresivamente. Este trazado refleja horas de deterioro acumulado." />
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Progresión temporal — Las 4 etapas</h3>
+      <div className="relative pl-8 space-y-0">
+        {[
+          { color:'bg-emerald-500', border:'border-emerald-300', bg:'bg-emerald-50', text:'text-emerald-800', label:'Horas 1–2: Compensación activa', items:['Tardías intermitentes con variabilidad conservada','Ciclado presente','Aceleraciones posibles entre contracciones'], footer:'Reserva intacta — el feto se defiende' },
+          { color:'bg-amber-500', border:'border-amber-300', bg:'bg-amber-50', text:'text-amber-800', label:'Horas 2–4: Compensación en límite', items:['Tardías en cada contracción','Taquicardia leve (155–165 lpm)','Ciclado que comienza a reducirse'], footer:'Reserva disminuyendo — monitorización estrecha' },
+          { color:'bg-orange-500', border:'border-orange-300', bg:'bg-orange-50', text:'text-orange-800', label:'Horas 4–6: Agotamiento de reserva', items:['Tardías profundas recurrentes','Taquicardia establecida (> 165 lpm)','Variabilidad que disminuye','Pérdida completa del ciclado'], footer:'Reserva en agotamiento — preparar extracción' },
+          { color:'bg-red-600', border:'border-red-300', bg:'bg-red-50', text:'text-red-800', label:'> 6 horas sin intervención: Descompensación', items:['Variabilidad ausente o mínima','Tardías con nadir profundo','Posible bradicardia terminal'], footer:'Reserva agotada — actuar sin demora' },
+        ].map((stage, i, arr) => (
+          <div key={i} className="flex gap-4">
+            <div className="flex flex-col items-center">
+              <div className={`w-4 h-4 rounded-full ${stage.color} shrink-0 mt-4 z-10`}/>
+              {i < arr.length-1 && <div className="w-0.5 bg-slate-300 flex-1 my-1"/>}
+            </div>
+            <div className={`rounded-xl border ${stage.border} ${stage.bg} p-4 mb-3 flex-1`}>
+              <p className={`font-bold text-sm mb-2 ${stage.text}`}>{stage.label}</p>
+              <ul className="space-y-1 mb-2">
+                {stage.items.map((item,j) => <li key={j} className={`text-xs flex items-start gap-1 ${stage.text} opacity-90`}><span className="mt-0.5 shrink-0">•</span>{item}</li>)}
+              </ul>
+              <p className={`text-xs font-semibold italic ${stage.text}`}>{stage.footer}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Parámetros por etapa</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-xs">
+        <div className="grid grid-cols-4 bg-slate-800 text-white">
+          {['Parámetro','Compensada','En transición','Agotada'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['FCF basal','Normal','155–165 lpm','> 165 lpm'],
+          ['Variabilidad','Normal','Reducida','Ausente o mínima'],
+          ['Ciclado','Presente','Reducido','Ausente'],
+          ['Aceleraciones','Posibles','Ausentes','Ausentes'],
+          ['Desaceleraciones','Tardías intermitentes','Tardías en cada contracción','Tardías profundas'],
+          ['Conducta','Observar activamente','Intervenir','Extracción'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-4 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className={`p-3 border-r border-slate-100 last:border-0 ${j===0?'font-semibold text-slate-700':j===1?'text-emerald-700':j===2?'text-amber-700':'text-red-700'}`}>{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4">
+      <p className="font-bold text-indigo-800 text-sm mb-2">Concepto clave: la tendencia temporal</p>
+      <p className="text-indigo-700 text-sm leading-relaxed">
+        <strong>La tendencia temporal vale más que cualquier hallazgo puntual.</strong> Un trazado con tardías y variabilidad de 8 lpm que hace 3 horas tenía variabilidad de 15 lpm y no tenía tardías, muestra deterioro progresivo — aunque la variabilidad "esté dentro de rango" en este momento. Revisar el trazado completo es obligatorio.
+      </p>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "La hipoxia lentamente evolutiva es la única que el CTG puede documentar de principio a fin — si se mira el trazado como una película, no como una fotografía. La pérdida del ciclado precede a la pérdida de variabilidad. Es la señal más precoz de que la reserva está comenzando a agotarse."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const T18Content = () => (
+  <div className="space-y-8">
+    <p className="text-slate-600 leading-relaxed">
+      No es una hipoxia que ocurre durante el parto — es una hipoxia que el feto <strong className="text-slate-800">ya traía</strong>. Fetos con RCIU severo, preeclampsia, insuficiencia placentaria crónica llegan al parto con reserva ya comprometida. Su CTG de ingreso ya está alterado. El mismo estrés que un feto sano toleraría durante horas, a este feto puede descompensarlo en minutos.
+    </p>
+
+    <MiniCTG config={CFG_HIPOXIA_CRONICA} label="Hipoxia crónica — Shallow late con variabilidad mínima"
+      caption="Basal rígida (~165 lpm), variabilidad mínima o ausente, tardías superficiales. Sin ciclado. Sin aceleraciones. Este es el trazado de INGRESO — el feto ya llega comprometido." />
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">CTG de la hipoxia crónica</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-sm">
+        <div className="grid grid-cols-3 bg-slate-800 text-white text-xs">
+          {['Parámetro','Hallazgo típico','Mecanismo'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['FCF basal','160–170 lpm, rígida','Tono simpático crónico aumentado'],
+          ['Variabilidad','Mínima (2–4 lpm)','Disfunción autonómica crónica'],
+          ['Ciclado','Ausente','Compromiso cortical crónico'],
+          ['Aceleraciones','Ausentes','Reducción actividad cortical'],
+          ['Desaceleraciones','Tardías superficiales ("shallow late")','Quimiorreceptores al límite, sin reserva vagal'],
+          ['Respuesta a estimulación','Reducida o ausente','Capacidad cortical comprometida'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-3 text-slate-700 border-r border-slate-100 last:border-0 text-xs">{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-red-50 border-l-4 border-red-500 rounded-r-xl p-4 flex items-start gap-3">
+      <AlertTriangle size={18} className="text-red-600 shrink-0 mt-0.5"/>
+      <div>
+        <p className="font-bold text-red-800 text-sm mb-1">Alerta clínica crítica</p>
+        <p className="text-red-700 text-sm leading-relaxed">
+          <strong>Las tardías superficiales son más preocupantes que las tardías profundas en este contexto.</strong> La pequeña amplitud no refleja un problema menor — refleja que el feto ya no tiene capacidad de generar una respuesta vagal enérgica. La profundidad de la desaceleración y la gravedad del compromiso no son proporcionales.
+        </p>
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Feto sano vs Feto con hipoxia crónica</h3>
+      <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm text-xs">
+        <div className="grid grid-cols-3 bg-slate-800 text-white">
+          {['Aspecto','Feto sano al inicio','Feto con hipoxia crónica'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Reserva al inicio','Plena','Ya comprometida'],
+          ['Tolerancia a contracciones','Alta — horas','Baja — minutos'],
+          ['Respuesta a taquisistolia','Puede tolerar períodos cortos','Descompensación rápida'],
+          ['Umbral de intervención','Estándar','Más bajo — actuar antes'],
+          ['Objetivo del parto','Vaginal posible','Evaluar cesárea electiva'],
+          ['CTG de ingreso','Normal','Ya alterado'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className={`p-3 border-r border-slate-100 last:border-0 ${j===2?'text-red-700':j===1?'text-emerald-700':'font-semibold text-slate-700'}`}>{c}</div>)}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3">Adaptaciones fetales a la hipoxia crónica</h3>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { icon:'🔴', title:'Policitemia', desc:'↑ masa eritrocitaria para compensar baja PaO₂' },
+          { icon:'🔴', title:'Brain-sparing crónico', desc:'Redistribución permanente hacia cerebro, corazón y suprarrenales' },
+          { icon:'🔴', title:'↓ Movimientos fetales', desc:'Reduce consumo de O₂ → RCIU + oligohidramnios' },
+          { icon:'🔴', title:'Maduración acelerada SNA', desc:'Pero con escasa reserva de respuesta adicional' },
+        ].map((item,i) => (
+          <div key={i} className="bg-slate-100 rounded-xl p-4">
+            <p className="font-bold text-slate-800 text-sm mb-1">{item.icon} {item.title}</p>
+            <p className="text-slate-600 text-xs">{item.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+      <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5"/>
+      <div>
+        <p className="font-bold text-amber-800 text-sm mb-1">Criterios de vigilancia ajustados</p>
+        <p className="text-amber-700 text-sm leading-relaxed">
+          Lo que en un feto sano puede observarse durante horas, en el feto con hipoxia crónica puede requerir decisión en minutos. La ausencia de ciclado en este contexto no es quiescencia — es la ausencia de capacidad para ciclar.
+        </p>
+      </div>
+    </div>
+
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "El feto con hipoxia crónica llega al trabajo de parto con las reservas parcialmente gastadas. No lo evalúes como si empezara desde cero. Los estándares de vigilancia deben ajustarse al paciente, no al protocolo genérico."
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+// TOPIC_CONTENT definido DESPUÉS de todos los componentes T1–T18
 // para evitar React error #130 (componente undefined al evaluar JSX)
 const TOPIC_CONTENT: Record<string, React.ReactNode> = {
   t1: <T1Content />,
@@ -2809,6 +3318,12 @@ const TOPIC_CONTENT: Record<string, React.ReactNode> = {
   t10: <T10Content />,
   t11: <T11Content />,
   t12: <T12Content />,
+  t13: <T13Content />,
+  t14: <T14Content />,
+  t15: <T15Content />,
+  t16: <T16Content />,
+  t17: <T17Content />,
+  t18: <T18Content />,
 };
 
 const TheoryDocsView = ({ onBack, initialModule = 'm1' }: { onBack: () => void; initialModule?: string }) => {
