@@ -3303,7 +3303,357 @@ const T18Content = () => (
   </div>
 );
 
-// TOPIC_CONTENT definido DESPUÉS de todos los componentes T1–T18
+// ─── MÓDULO 5: INTERPRETACIÓN CLÍNICA ────────────────────────────────────
+
+const STEP_COLORS = [
+  'bg-slate-700','bg-cyan-600','bg-blue-600','bg-emerald-600',
+  'bg-amber-500','bg-orange-500','bg-red-500','bg-red-700'
+];
+
+const AlgoStep = ({ n, title, children }: { n: number; title: string; children: React.ReactNode }) => (
+  <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+    <div className={`flex items-center gap-4 px-5 py-4 ${STEP_COLORS[n-1]}`}>
+      <span className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center text-white font-black text-lg shrink-0">{n}</span>
+      <h3 className="text-white font-bold text-base">{title}</h3>
+    </div>
+    <div className="p-5 bg-white space-y-4">{children}</div>
+  </div>
+);
+
+const CaseCard = ({ letter, title, color, border, items }: { letter: string; title: string; color: string; border: string; items: string[] }) => (
+  <div className={`rounded-xl border ${border} ${color} p-5`}>
+    <p className="font-bold text-slate-800 text-sm mb-3">Caso {letter} — {title}</p>
+    <div className="space-y-1">
+      {items.map((item, i) => (
+        <div key={i} className="flex items-start gap-2 text-xs text-slate-700">
+          <span className="font-bold text-slate-500 shrink-0">P{i+1}:</span>
+          <span>{item}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+const T19Content = () => (
+  <div className="space-y-6">
+
+    {/* Intro */}
+    <div className="bg-slate-900 text-white rounded-2xl p-6">
+      <div className="inline-flex items-center gap-2 bg-cyan-500 bg-opacity-20 border border-cyan-500 border-opacity-40 rounded-full px-3 py-1 mb-3">
+        <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"/>
+        <span className="text-cyan-300 text-xs font-bold">8 pasos · Siempre en secuencia</span>
+      </div>
+      <p className="text-white font-bold text-lg mb-2">"El algoritmo no reemplaza el juicio clínico — lo estructura."</p>
+      <p className="text-slate-400 text-sm leading-relaxed">Aplícalo en cada evaluación, no solo cuando el trazado "parece difícil". La consistencia es lo que previene errores sistemáticos.</p>
+    </div>
+
+    {/* Paso 1 */}
+    <AlgoStep n={1} title="¿Existe hipoxia crónica o compromiso previo al parto?">
+      <p className="text-slate-600 text-sm leading-relaxed"><strong className="text-slate-800">Antes de mirar el trazado</strong>, ¿qué contexto trae este feto? El feto con hipoxia crónica tiene reserva ya comprometida — sus umbrales de interpretación son distintos.</p>
+      <div className="rounded-xl overflow-hidden border border-slate-200 text-xs">
+        <div className="grid grid-cols-3 bg-slate-800 text-white">
+          {['Contexto clínico','Reserva inicial','Umbral de alarma'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Embarazo sin factores de riesgo','Plena','Estándar'],
+          ['RCIU leve / diabetes controlada','Levemente reducida','Más bajo'],
+          ['RCIU severo / preeclampsia','Comprometida','Mucho más bajo'],
+          ['Flujo umbilical ausente o reverso','Crítica','Mínimo'],
+          ['Postmadurez (> 41 sem)','Potencialmente reducida','Bajo'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-2.5 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+      <div className="text-xs text-slate-500 space-y-1">
+        <p className="font-semibold text-slate-700 mb-1">Datos a evaluar:</p>
+        {['RCIU, preeclampsia, diabetes, oligohidramnios','Resultados de Doppler fetal previos','CTG anteparto y su tendencia','Características del líquido amniótico (meconio espeso)','Edad gestacional'].map((d,i) => (
+          <div key={i} className="flex items-start gap-1.5"><span className="text-slate-400 mt-0.5">•</span>{d}</div>
+        ))}
+      </div>
+    </AlgoStep>
+
+    {/* Paso 2 */}
+    <AlgoStep n={2} title="Evaluar la línea basal">
+      <p className="text-slate-600 text-sm leading-relaxed">La basal refleja el equilibrio simpático-parasimpático. Un número fuera de rango <strong className="text-slate-800">no es una alarma automática</strong> — es una pregunta: ¿qué lo está causando?</p>
+      <div className="rounded-xl overflow-hidden border border-slate-200 text-xs">
+        <div className="grid grid-cols-3 bg-cyan-800 text-white">
+          {['Valor','Denominación','Primera pregunta'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['< 100 lpm','Bradicardia severa','¿Hipoxia aguda? ¿Bloqueo AV? → Emergencia','bg-red-50'],
+          ['100–109 lpm','Bradicardia leve','¿Fármacos? ¿Alto tono vagal? → Contextualizar','bg-orange-50'],
+          ['110–160 lpm','Normal','Continuar evaluación','bg-emerald-50'],
+          ['161–180 lpm','Taquicardia leve','¿Fiebre materna? ¿Fármacos? ¿Compensación hipóxica?','bg-amber-50'],
+          ['> 180 lpm','Taquicardia severa','¿Hipoxia avanzada? ¿Infección? ¿Arritmia?','bg-red-100'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${r[3]}`}>
+            {r.slice(0,3).map((c,j) => <div key={j} className="p-2.5 text-slate-700 border-r border-slate-100 last:border-0 font-mono text-xs">{c}</div>)}
+          </div>
+        ))}
+      </div>
+      <div className="bg-cyan-50 border border-cyan-200 rounded-xl p-3 text-sm text-cyan-800">
+        <strong>Regla clave:</strong> Una taquicardia de 170 lpm con variabilidad conservada y ciclado presente es menos preocupante que una FCF de 145 lpm con variabilidad ausente.
+      </div>
+    </AlgoStep>
+
+    {/* Paso 3 */}
+    <AlgoStep n={3} title="Evaluar la variabilidad">
+      <p className="text-slate-600 text-sm leading-relaxed">La pregunta no es solo "¿cuánto mide?" sino <strong className="text-slate-800">"¿cuánto tiempo lleva así y hay explicación no hipóxica?"</strong></p>
+      <div className="rounded-xl overflow-hidden border border-slate-200 text-xs">
+        <div className="grid grid-cols-3 bg-blue-800 text-white">
+          {['Categoría','Amplitud','Primeras preguntas'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Ausente','< 2 lpm','¿Fármacos? ¿Cuánto tiempo? ¿Responde a estimulación?'],
+          ['Mínima','2–5 lpm','¿Duración < 40 min? → posible sueño. > 40 min → evaluar'],
+          ['Normal','5–25 lpm','Tranquilizador. Continuar evaluación'],
+          ['Marcada','> 25 lpm','¿Transitoria (< 2 min) → benigna. Persistente → alarma'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-2.5 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+      <div>
+        <p className="text-xs font-semibold text-slate-700 mb-2">Si la variabilidad está reducida, evaluar en secuencia:</p>
+        <div className="space-y-1.5">
+          {[
+            '¿Recibió opioides, MgSO₄, betametasona en las últimas horas?',
+            '¿Cuánto tiempo lleva reducida? ¿Ha ciclado recientemente?',
+            'Intentar estimulación (digital o vibroacústica)',
+            'Si no responde y lleva > 40 min: integrar con los demás parámetros como señal de alerta',
+          ].map((s,i) => (
+            <div key={i} className="flex items-start gap-3 bg-slate-50 rounded-lg p-2.5">
+              <span className="w-5 h-5 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0">{i+1}</span>
+              <span className="text-xs text-slate-700">{s}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </AlgoStep>
+
+    {/* Paso 4 */}
+    <AlgoStep n={4} title="Evaluar el ciclado">
+      <p className="text-slate-600 text-sm leading-relaxed">El ciclado añade la <strong className="text-slate-800">dimensión temporal</strong>. Un feto que cicla tiene reserva neurológica — aunque en este momento esté en quiescencia. La pérdida del ciclado puede preceder a la pérdida de variabilidad.</p>
+      <div className="rounded-xl overflow-hidden border border-slate-200 text-xs">
+        <div className="grid grid-cols-3 bg-emerald-700 text-white">
+          {['Hallazgo','Interpretación','Acción'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Cycling en últimos 60 min','Reserva neurológica conservada','Interpretar variabilidad reducida como probable quiescencia'],
+          ['Cycling ausente, trazado < 30 min','Información insuficiente','Ampliar ventana de observación'],
+          ['Cycling ausente > 60 min sin explicación','Señal de alerta precoz','Elevar nivel de vigilancia'],
+          ['Cycling ausente + variabilidad reducida','Compromiso neurológico probable','Actuar'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-3 ${i===3?'bg-red-50':i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-2.5 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-sm text-emerald-800">
+        <strong>Regla práctica:</strong> Para evaluar el cycling necesitas al menos 30–60 minutos de trazado. Evaluar en una ventana de 10 minutos es diagnósticamente insuficiente.
+      </div>
+    </AlgoStep>
+
+    {/* Paso 5 */}
+    <AlgoStep n={5} title="Evaluar las desaceleraciones">
+      <p className="text-slate-600 text-sm leading-relaxed">Las desaceleraciones no son el problema — son la <strong className="text-slate-800">respuesta del feto al problema</strong>. El mecanismo importa más que la morfología. La variabilidad entre desaceleraciones es más importante que la profundidad.</p>
+      <div className="rounded-xl overflow-hidden border border-slate-200 text-xs">
+        <div className="grid grid-cols-5 bg-amber-700 text-white">
+          {['Tipo','Morfología orientativa','Mecanismo','Variabilidad entre desacel.','Urgencia'].map(h => <div key={h} className="p-2.5 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Precoces','Espejo de contracción','Compresión cefálica','Normal','Ninguna'],
+          ['Variables simples','Abrupta + hombros','Barorreceptor (cordón)','Normal → benignas','Cambio posición'],
+          ['Variables complicadas','Sin hombros, nadir < 70','Barorreceptor + quimiorreceptor','Reducida','Evaluar reserva urgente'],
+          ['Tardías','Gradual, desfasada','Quimiorreceptor (placenta)','Determina gravedad','Nunca benignas'],
+          ['Prolongadas','> 2 min','Mixto','Clave para decidir','Protocolo si > 3 min'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-5 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-2.5 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+      <div>
+        <p className="text-xs font-semibold text-slate-700 mb-2">3 preguntas obligatorias para cada desaceleración:</p>
+        <div className="space-y-1.5">
+          {['¿Cuál es el mecanismo? (morfología como orientación, no diagnóstico)','¿Cuál es la variabilidad ENTRE desaceleraciones?','¿Hay tendencia de empeoramiento? (más largas, más profundas, recuperación más lenta)'].map((q,i) => (
+            <div key={i} className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-lg p-2.5">
+              <span className="w-5 h-5 rounded-full bg-amber-500 text-white text-xs font-bold flex items-center justify-center shrink-0">{i+1}</span>
+              <span className="text-xs text-slate-700">{q}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </AlgoStep>
+
+    {/* Paso 6 */}
+    <AlgoStep n={6} title="Identificar el tipo de hipoxia">
+      <p className="text-slate-600 text-sm leading-relaxed">Este es el <strong className="text-slate-800">paso diagnóstico</strong>. No es clasificar morfología — es formular la hipótesis fisiopatológica que determina la urgencia y el tipo de intervención.</p>
+      <div className="rounded-xl overflow-hidden border border-slate-200 text-xs">
+        <div className="grid grid-cols-6 bg-orange-700 text-white">
+          {['Tipo','Basal','Variabilidad','Ciclado','Desaceleraciones','Velocidad'].map(h => <div key={h} className="p-2.5 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Hipoxia crónica','160–170 lpm rígida','Mínima o ausente','Ausente','Shallow late','Preexistente'],
+          ['Hipoxia lenta','Taquicardia progresiva','Progresivamente reducida','Precozmente ausente','Tardías recurrentes','Horas'],
+          ['Hipoxia subaguda','Normal o leve taquicardia','Reducida en desacel.','Ausente','Variables prolongadas','Minutos'],
+          ['Hipoxia aguda','Normal → bradicardia súbita','Variable → ausente','Ausente','Bradicardia terminal','Segundos'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-6 ${i%2?'bg-slate-50':'bg-white'}`}>
+            {r.map((c,j) => <div key={j} className="p-2.5 text-slate-700 border-r border-slate-100 last:border-0">{c}</div>)}
+          </div>
+        ))}
+      </div>
+      <div>
+        <p className="text-xs font-semibold text-slate-700 mb-3">Diagrama de decisión:</p>
+        <div className="space-y-2 text-xs">
+          {[
+            { q:'¿Instalación aguda (< 3 min)?', si:{ label:'HIPOXIA AGUDA', desc:'Protocolo 15 min', color:'bg-red-600' }, no:'Continuar ↓' },
+            { q:'¿Taquisistolia + variables sin recuperación?', si:{ label:'HIPOXIA SUBAGUDA', desc:'Suspender oxitocina inmediato', color:'bg-orange-500' }, no:'Continuar ↓' },
+            { q:'¿Tardías progresivas durante horas?', si:{ label:'HIPOXIA LENTA', desc:'Evaluar reserva, timing extracción', color:'bg-amber-500' }, no:'HIPOXIA CRÓNICA — Umbrales bajos desde ingreso' },
+          ].map((node, i) => (
+            <div key={i} className="bg-slate-50 border border-slate-200 rounded-xl p-3">
+              <p className="font-semibold text-slate-700 mb-2">❓ {node.q}</p>
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className={`flex items-center gap-2 ${node.si.color} text-white rounded-lg px-3 py-1.5`}>
+                  <span className="font-bold">SÍ →</span>
+                  <div>
+                    <p className="font-bold text-xs">{node.si.label}</p>
+                    <p className="text-xs opacity-80">{node.si.desc}</p>
+                  </div>
+                </div>
+                <span className="text-slate-400 font-bold">| NO → {node.no}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </AlgoStep>
+
+    {/* Paso 7 */}
+    <AlgoStep n={7} title="Determinar la reserva fetal actual">
+      <p className="text-slate-600 text-sm leading-relaxed">La reserva fetal es un <strong className="text-slate-800">continuum</strong>, no un valor binario. Su estimación determina cuánto margen existe para medidas conservadoras antes de que la extracción sea imperativa.</p>
+      <div className="rounded-xl overflow-hidden border border-slate-200 text-xs">
+        <div className="grid grid-cols-6 bg-red-700 text-white">
+          {['Variabilidad','Ciclado','Aceleraciones','Desaceleraciones','Reserva estimada','Conducta'].map(h => <div key={h} className="p-2.5 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Normal','Presente','Presentes','Ausentes o var. simples','Plena','Observar','bg-emerald-50'],
+          ['Normal','Presente','Ausentes','Variables simples','Adecuada','Monitorizar estrecho','bg-emerald-50'],
+          ['Normal','Ausente','Ausentes','Tardías recurrentes','Disminuyendo','Intervención dirigida','bg-amber-50'],
+          ['Reducida','Ausente','Ausentes','Tardías o var. complicadas','En agotamiento','Preparar extracción','bg-orange-50'],
+          ['Ausente','Ausente','Ausentes','Tardías / bradicardia','Agotada','Extracción sin demora','bg-red-100'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-6 ${r[6]}`}>
+            {r.slice(0,6).map((c,j) => <div key={j} className={`p-2.5 border-r border-slate-100 last:border-0 ${j===4?'font-semibold text-slate-800':j===5?'font-bold text-red-700':''} text-slate-700`}>{c}</div>)}
+          </div>
+        ))}
+      </div>
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-sm text-amber-800">
+        <strong>Regla práctica:</strong> Variabilidad ausente + ciclado ausente + sin aceleraciones + desaceleraciones recurrentes = reserva agotada. No esperar más signos para actuar.
+      </div>
+    </AlgoStep>
+
+    {/* Paso 8 */}
+    <AlgoStep n={8} title="Definir la conducta">
+      <p className="text-slate-600 text-sm leading-relaxed">La conducta debe ser <strong className="text-slate-800">proporcional al tipo de hipoxia y al estado de la reserva</strong>. No existe una respuesta universal ante "el CTG alterado".</p>
+      <div className="grid grid-cols-2 gap-3">
+        {[
+          { icon:'🎯', title:'Dirigir al mecanismo', desc:'No toda alteración requiere cesárea. Taquisistolia → suspender oxitocina. Hipotensión → fluidos. Compresión cordón → cambio posición.' },
+          { icon:'📊', title:'La respuesta es diagnóstica', desc:'Un trazado que mejora al suspender oxitocina confirma la causa. Uno que no mejora indica que no es corregible.' },
+          { icon:'📝', title:'Documentar todo', desc:'Hora de cada hallazgo, intervención realizada, respuesta observada. En un evento adverso, es la única evidencia.' },
+          { icon:'📣', title:'Comunicar anticipadamente', desc:'Avisar al equipo cuando el trazado comienza a deteriorarse — no cuando ya es emergencia. Usar SBAR.' },
+        ].map((p,i) => (
+          <div key={i} className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <p className="text-xl mb-1">{p.icon}</p>
+            <p className="font-bold text-slate-800 text-xs mb-1">{p.title}</p>
+            <p className="text-xs text-slate-600 leading-relaxed">{p.desc}</p>
+          </div>
+        ))}
+      </div>
+      <div className="rounded-xl overflow-hidden border border-slate-200 text-xs">
+        <div className="grid grid-cols-2 bg-red-900 text-white">
+          {['Reserva estimada','Conducta'].map(h => <div key={h} className="p-3 font-bold">{h}</div>)}
+        </div>
+        {[
+          ['Plena','Observación activa + monitorización continua','bg-emerald-50'],
+          ['Adecuada','Medidas conservadoras dirigidas al mecanismo','bg-emerald-50'],
+          ['Disminuyendo','Intervención + alerta al equipo + métodos segunda línea','bg-amber-50'],
+          ['En agotamiento','Preparar extracción en paralelo con medidas conservadoras','bg-orange-50'],
+          ['Agotada','Extracción sin demora · Vía según condiciones','bg-red-100'],
+          ['Emergencia aguda','Protocolo 15 min · Reanimación + extracción simultáneas','bg-red-200'],
+        ].map((r,i) => (
+          <div key={i} className={`grid grid-cols-2 ${r[2]}`}>
+            <div className="p-2.5 font-semibold text-slate-700 border-r border-slate-100">{r[0]}</div>
+            <div className="p-2.5 text-slate-700">{r[1]}</div>
+          </div>
+        ))}
+      </div>
+    </AlgoStep>
+
+    {/* Casos ilustrativos */}
+    <div>
+      <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">Aplicación del algoritmo — Casos ilustrativos</h3>
+      <div className="space-y-4">
+        <CaseCard letter="A" title="Variables con variabilidad normal" color="bg-emerald-50" border="border-emerald-200" items={[
+          'Sin factores de riesgo → reserva plena',
+          'Basal 145 lpm → normal',
+          'Variabilidad 12 lpm → normal',
+          'Ciclado presente',
+          'Variables simples con hombros → barorreceptor',
+          'No hay hipoxia — respuesta barorreceptora a compresión de cordón',
+          'Reserva plena',
+          'Cambio de posición. No intervenir obstétricamente.',
+        ]}/>
+        <CaseCard letter="B" title="Tardías progresivas en RCIU" color="bg-amber-50" border="border-amber-200" items={[
+          'RCIU diagnosticado → reserva comprometida de base',
+          'Basal 168 lpm y subiendo → taquicardia compensatoria',
+          'Variabilidad 4 lpm y disminuyendo → mínima, no farmacológica',
+          'Ciclado ausente en últimas 2 horas',
+          'Tardías en cada contracción → quimiorreceptoras',
+          'Hipoxia lentamente evolutiva sobre reserva crónica comprometida',
+          'Reserva en agotamiento avanzado',
+          'Extracción sin demora. No hay medida conservadora que corrija insuficiencia placentaria crónica.',
+        ]}/>
+        <CaseCard letter="C" title="Bradicardia súbita post-amniorrexis" color="bg-red-50" border="border-red-200" items={[
+          'Sin factores de riesgo → reserva plena',
+          'FCF cae de 140 a 65 lpm en 30 seg → bradicardia severa aguda',
+          'Variabilidad inicialmente conservada durante la bradicardia',
+          'Irrelevante — urgencia supera evaluación del cycling',
+          'Bradicardia sin relación con contracciones, sin recuperación en 3 min',
+          'Hipoxia aguda. Causa probable: prolapso de cordón (confirmar con TV)',
+          'Reserva presente en este momento, ventana de minutos',
+          'Protocolo evento centinela. Regla 15 min. Reanimación + extracción simultáneas.',
+        ]}/>
+      </div>
+    </div>
+
+    {/* Perla clínica */}
+    <div className="bg-slate-900 rounded-xl p-5 flex items-start gap-4">
+      <span className="text-2xl shrink-0">💎</span>
+      <div>
+        <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-1">Perla clínica</p>
+        <p className="text-white font-medium leading-relaxed">
+          "El algoritmo no reemplaza el juicio clínico — lo estructura. Un clínico que lo aplica consistentemente tiene más probabilidad de llegar al juicio correcto que uno que confía solo en su intuición visual. La consistencia es lo que previene errores sistemáticos."
+        </p>
+      </div>
+    </div>
+
+    {/* Cierre */}
+    <div className="bg-slate-900 text-white rounded-2xl p-6">
+      <p className="text-xs font-bold uppercase tracking-widest text-cyan-400 mb-3">El objetivo final</p>
+      <p className="text-white leading-relaxed">
+        Un profesional que ha interiorizado este algoritmo no lo aplica como una lista de verificación — lo aplica como un modo de pensar. Ante cada trazado, las ocho preguntas se responden de forma casi simultánea, generando una imagen diagnóstica integrada. Ese es el objetivo de FetalPhysio: no que reconozcas patrones, sino que <strong className="text-cyan-300">comprendas al feto</strong>.
+      </p>
+    </div>
+
+  </div>
+);
+
+// TOPIC_CONTENT definido DESPUÉS de todos los componentes T1–T19
 // para evitar React error #130 (componente undefined al evaluar JSX)
 const TOPIC_CONTENT: Record<string, React.ReactNode> = {
   t1: <T1Content />,
@@ -3324,6 +3674,7 @@ const TOPIC_CONTENT: Record<string, React.ReactNode> = {
   t16: <T16Content />,
   t17: <T17Content />,
   t18: <T18Content />,
+  t19: <T19Content />,
 };
 
 const TheoryDocsView = ({ onBack, initialModule = 'm1' }: { onBack: () => void; initialModule?: string }) => {
