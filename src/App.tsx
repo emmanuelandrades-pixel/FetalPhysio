@@ -752,11 +752,11 @@ const BeyondTheTracing = () => {
             Cardiotocografía Basada en Fisiología
           </div>
           <h2 className="text-4xl md:text-5xl font-semibold text-white mb-4 tracking-tight">
-            Beyond the Tracing
+            Más Allá del Trazado
           </h2>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
-            Every cardiotocographic pattern reflects a physiological process. Learn to understand
-            fetal adaptation, compensation and hypoxic progression.
+            Cada patrón cardiotocográfico refleja un proceso fisiológico. Aprende a comprender
+            la adaptación fetal, la compensación y la progresión hipóxica.
           </p>
         </div>
 
