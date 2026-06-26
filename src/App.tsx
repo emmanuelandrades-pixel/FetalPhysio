@@ -752,11 +752,11 @@ const BeyondTheTracing = () => {
             Cardiotocografía Basada en Fisiología
           </div>
           <h2 className="text-4xl md:text-5xl font-semibold text-white mb-4 tracking-tight">
-            Beyond the Tracing
+            Más Allá del Trazado
           </h2>
           <p className="text-slate-400 text-lg max-w-2xl mx-auto leading-relaxed">
-            Every cardiotocographic pattern reflects a physiological process. Learn to understand
-            fetal adaptation, compensation and hypoxic progression.
+            Cada patrón cardiotocográfico refleja un proceso fisiológico. Aprende a comprender
+            la adaptación fetal, la compensación y la progresión hipóxica.
           </p>
         </div>
 
@@ -4627,19 +4627,19 @@ export default function App() {
             </button>
             
             {/* Botones de Navegación */}
-            <div className="flex space-x-1 sm:space-x-2 overflow-x-auto custom-scrollbar-nav pb-1 sm:pb-0">
+            <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto custom-scrollbar-nav pb-1 sm:pb-0">
               {[
                 { id: 'inicio', label: 'Inicio', icon: <Info size={18}/> },
                 { id: 'teoria', label: 'Teoría', icon: <BookOpen size={18}/> },
                 { id: 'entrenamiento', label: 'Entrenamiento', icon: <Stethoscope size={18}/> },
                 { id: 'quienes', label: 'Quiénes Somos', icon: <User size={18}/> }
               ].map(item => (
-                <button 
-                  key={item.id} 
+                <button
+                  key={item.id}
                   onClick={() => navigateTo(item.id)}
                   className={`px-3 py-3 sm:px-5 sm:py-2.5 rounded-lg font-medium text-sm transition-all flex items-center gap-2 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-cyan-500 ${
                     currentView === item.id || (item.id === 'entrenamiento' && currentView === 'simulador')
-                      ? 'bg-cyan-600 text-white shadow-md' 
+                      ? 'bg-cyan-600 text-white shadow-md'
                       : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                   }`}
                 >
