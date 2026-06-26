@@ -4018,10 +4018,17 @@ const TheoryDocsView = ({ onBack, initialModule = 'm1' }: { onBack: () => void; 
   const [activeModule, setActiveModule] = useState(initialModule);
   const [activeTopic, setActiveTopic] = useState(initMod.topics[0].id);
   const [openModules, setOpenModules] = useState<Record<string,boolean>>({ [initialModule]: true });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
 
   const toggleModule = (id: string) => {
     setOpenModules(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  const selectTopic = (topicId: string, moduleId: string) => {
+    setActiveTopic(topicId);
+    setActiveModule(moduleId);
+    setSidebarOpen(false);
   };
 
   // Scroll al inicio cada vez que cambia el tema activo
@@ -4033,78 +4040,115 @@ const TheoryDocsView = ({ onBack, initialModule = 'm1' }: { onBack: () => void; 
   const currentTopic = currentModule?.topics.find(t => t.id === activeTopic);
   const content = TOPIC_CONTENT[activeTopic] ?? TOPIC_COMING_SOON(currentTopic?.title ?? '');
 
+  const SidebarContent = () => (
+    <>
+      {/* Header sidebar */}
+      <div className="px-5 py-5 border-b border-slate-800">
+        <button onClick={onBack}
+          className="flex items-center gap-2 text-xs text-slate-400 hover:text-cyan-400 transition-colors mb-4">
+          <ChevronRight size={14} className="rotate-180"/> Volver
+        </button>
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">FetalPhysio</p>
+        <h2 className="text-white font-bold text-base leading-tight">Bases Fisiopatológicas<br/>del CTG</h2>
+        <p className="text-[10px] text-slate-500 mt-1">Chandraharan · Ugwumadu · NICE</p>
+      </div>
+
+      {/* Nav por módulos */}
+      <nav className="flex-1 py-4 px-3">
+        {THEORY_MODULES.map(mod => (
+          <div key={mod.id} className="mb-1">
+            <button
+              onClick={() => { toggleModule(mod.id); setActiveModule(mod.id); }}
+              className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-slate-800 group"
+            >
+              <div className="flex items-center gap-3">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{background: mod.color}}/>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest" style={{color: mod.color}}>{mod.label}</p>
+                  <p className="text-slate-300 text-xs font-medium group-hover:text-white transition-colors">{mod.title}</p>
+                </div>
+              </div>
+              <ChevronRight size={14} className={`text-slate-500 transition-transform ${openModules[mod.id] ? 'rotate-90' : ''}`}/>
+            </button>
+
+            {openModules[mod.id] && (
+              <div className="ml-5 pl-3 border-l border-slate-700 mt-1 mb-2 space-y-0.5">
+                {mod.topics.map(topic => {
+                  const isActive = activeTopic === topic.id;
+                  const hasContent = !!TOPIC_CONTENT[topic.id];
+                  return (
+                    <button
+                      key={topic.id}
+                      onClick={() => selectTopic(topic.id, mod.id)}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-2 ${
+                        isActive
+                          ? 'text-white font-semibold'
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                      }`}
+                      style={isActive ? {background: `${mod.color}20`, color: mod.color} : {}}
+                    >
+                      <span className={`w-1 h-1 rounded-full shrink-0 ${isActive ? '' : 'bg-slate-600'}`}
+                        style={isActive ? {background: mod.color} : {}}/>
+                      {topic.title}
+                      {!hasContent && (
+                        <span className="ml-auto text-[9px] text-slate-600 font-normal">Pronto</span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        ))}
+      </nav>
+    </>
+  );
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50" style={{marginTop:'-1px'}}>
 
-      {/* ── Sidebar ── */}
-      <div className="w-72 shrink-0 bg-slate-900 flex flex-col border-r border-slate-800 overflow-y-auto">
-        {/* Header sidebar */}
-        <div className="px-5 py-5 border-b border-slate-800">
-          <button onClick={onBack}
-            className="flex items-center gap-2 text-xs text-slate-400 hover:text-cyan-400 transition-colors mb-4">
-            <ChevronRight size={14} className="rotate-180"/> Volver
-          </button>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">FetalPhysio</p>
-          <h2 className="text-white font-bold text-base leading-tight">Bases Fisiopatológicas<br/>del CTG</h2>
-          <p className="text-[10px] text-slate-500 mt-1">Chandraharan · Ugwumadu · NICE</p>
-        </div>
-
-        {/* Nav por módulos */}
-        <nav className="flex-1 py-4 px-3">
-          {THEORY_MODULES.map(mod => (
-            <div key={mod.id} className="mb-1">
-              <button
-                onClick={() => { toggleModule(mod.id); setActiveModule(mod.id); }}
-                className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-slate-800 group"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="w-2 h-2 rounded-full shrink-0" style={{background: mod.color}}/>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{color: mod.color}}>{mod.label}</p>
-                    <p className="text-slate-300 text-xs font-medium group-hover:text-white transition-colors">{mod.title}</p>
-                  </div>
-                </div>
-                <ChevronRight size={14} className={`text-slate-500 transition-transform ${openModules[mod.id] ? 'rotate-90' : ''}`}/>
-              </button>
-
-              {openModules[mod.id] && (
-                <div className="ml-5 pl-3 border-l border-slate-700 mt-1 mb-2 space-y-0.5">
-                  {mod.topics.map(topic => {
-                    const isActive = activeTopic === topic.id;
-                    const hasContent = !!TOPIC_CONTENT[topic.id];
-                    return (
-                      <button
-                        key={topic.id}
-                        onClick={() => { setActiveTopic(topic.id); setActiveModule(mod.id); }}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-2 ${
-                          isActive
-                            ? 'text-white font-semibold'
-                            : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-                        }`}
-                        style={isActive ? {background: `${mod.color}20`, color: mod.color} : {}}
-                      >
-                        <span className={`w-1 h-1 rounded-full shrink-0 ${isActive ? '' : 'bg-slate-600'}`}
-                          style={isActive ? {background: mod.color} : {}}/>
-                        {topic.title}
-                        {!hasContent && (
-                          <span className="ml-auto text-[9px] text-slate-600 font-normal">Pronto</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          ))}
-        </nav>
+      {/* ── Sidebar desktop (≥lg) ── */}
+      <div className="hidden lg:flex w-72 shrink-0 bg-slate-900 flex-col border-r border-slate-800 overflow-y-auto">
+        <SidebarContent />
       </div>
+
+      {/* ── Drawer móvil (overlay) ── */}
+      {sidebarOpen && (
+        <div className="lg:hidden fixed inset-0 z-40 flex">
+          {/* Overlay */}
+          <div className="absolute inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
+          {/* Panel */}
+          <div className="relative w-72 bg-slate-900 flex flex-col overflow-y-auto z-50 shadow-2xl">
+            <SidebarContent />
+          </div>
+        </div>
+      )}
 
       {/* ── Contenido principal ── */}
       <div ref={contentRef} className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-8 py-10">
 
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-xs text-slate-400 mb-6">
+        {/* Barra superior móvil */}
+        <div className="lg:hidden flex items-center gap-3 px-4 py-3 bg-slate-900 border-b border-slate-800 sticky top-0 z-30">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            aria-label="Abrir menú de módulos"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-xs font-bold uppercase tracking-widest truncate" style={{color: currentModule.color}}>{currentModule.label}</span>
+            <ChevronRight size={12} className="text-slate-600 shrink-0"/>
+            <span className="text-xs text-slate-300 truncate">{currentTopic?.title}</span>
+          </div>
+        </div>
+
+        <div className="max-w-3xl mx-auto px-4 sm:px-8 py-8 sm:py-10">
+
+          {/* Breadcrumb (solo desktop) */}
+          <div className="hidden lg:flex items-center gap-2 text-xs text-slate-400 mb-6">
             <span style={{color: currentModule.color}} className="font-semibold">{currentModule.label}</span>
             <ChevronRight size={12}/>
             <span className="text-slate-600">{currentTopic?.title}</span>
