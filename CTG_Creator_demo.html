@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CTG Creator — FetalPhysio Tools</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #0B1120; color: white; font-family: system-ui, -apple-system, sans-serif; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #1e293b; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    input[type=range] { accent-color: #22d3ee; }
+    input[type=number]::-webkit-inner-spin-button { opacity: 0.5; }
+    select option { background: #1e293b; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const { useState, useEffect, useRef } = React;
+const e = React.createElement;
+
+// ── Canvas constants ──────────────────────────────────────
+const FHR_TOP    = 22;
+const FHR_BOTTOM = 262;
+const TOCO_TOP   = 280;
+const TOCO_BOTTOM= 370;
+const CANVAS_H   = 388;
+const PX_PER_MIN = 60;
+const AXIS_W     = 44;
+
+// ── Maths ─────────────────────────────────────────────────
+const hash = n => { const s = Math.sin(n * 12.9898) * 43758.5453; return (s - Math.floor(s)) - 0.5; };
+const smoothstep = (a, b, t) => { const x = Math.max(0, Math.min(1, (t - a) / (b - a))); return x * x * (3 - 2 * x); };
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+const gaussian = (x, c, w, a) => a * Math.exp(-0.5 * ((x - c) / w) ** 2);
+
+const fhrToPx  = fhr => FHR_TOP  + (210 - fhr)  / (210 - 50)  * (FHR_BOTTOM - FHR_TOP);
+const tocoToPx = p   => TOCO_BOTTOM - (p / 100) * (TOCO_BOTTOM - TOCO_TOP);
+
+// Variability amplitudes
+const VAR_AMP = { absent: 0.4, minimal: 2.5, normal: 8, marked: 22 };
+
+const variabilityAt = (x, amp) => {
+  const slow = Math.sin(x / 17) + 0.6 * Math.sin(x / 6.3) + 0.4 * Math.sin(x / 2.7);
+  const beat = hash(x) * 1.2;
+  return ((slow / 2.0) + beat * 0.5) * (amp / 2);
+};
+
+const cyclingFactor = min => {
+  const phase = Math.sin((min / 4) * Math.PI);
+  return 0.35 + 0.65 * (0.5 + 0.5 * phase);
+};
+
+// ── Deceleration drop at time t (minutes) ─────────────────
+function decelDropAt(t, x, decels) {
+  let drop = 0;
+  decels.forEach((d, i) => {
+    const seed    = i * 47.3;
+    const depth   = d.depth   ?? 30;
+    const durMin  = (d.duration ?? 45) / 60;
+    const startT  = d.time ?? 1;
+    const endT    = startT + durMin;
+    const type    = d.type ?? 'variable';
+
+    if (type === 'variable') {
+      const dropSec  = 5 / 60;
+      const nadirEnd = endT - dropSec;
+      if (t >= startT && t < startT + dropSec) {
+        const p = (t - startT) / dropSec;
+        drop = Math.max(drop, smoothstep(0, 1, p) * depth);
+      } else if (t >= startT + dropSec && t < nadirEnd) {
+        const jitter = hash(x * 0.4 + seed) * depth * 0.07;
+        drop = Math.max(drop, depth + jitter);
+      } else if (t >= nadirEnd && t < endT) {
+        const p = (endT - t) / dropSec;
+        drop = Math.max(drop, smoothstep(0, 1, p) * depth);
+      }
+
+    } else if (type === 'late') {
+      const lag  = 30 / 60;
+      const s    = startT + lag;
+      const e_   = endT + lag;
+      const mid  = s + (e_ - s) / 2;
+      if (t >= s && t < mid) {
+        drop = Math.max(drop, smoothstep(0, 1, (t - s) / (mid - s)) * depth);
+      } else if (t >= mid && t <= e_) {
+        drop = Math.max(drop, smoothstep(0, 1, (e_ - t) / (e_ - mid)) * depth);
+      }
+
+    } else if (type === 'early') {
+      if (t >= startT && t <= endT) {
+        const p = (t - startT) / durMin;
+        drop = Math.max(drop, Math.sin(p * Math.PI) * depth);
+      }
+
+    } else if (type === 'prolonged') {
+      const rampUp   = 0.25;
+      const rampDown = 0.25;
+      if (t >= startT && t < startT + rampUp) {
+        drop = Math.max(drop, smoothstep(0, 1, (t - startT) / rampUp) * depth);
+      } else if (t >= startT + rampUp && t < endT - rampDown) {
+        const jitter = hash(x * 0.2 + seed) * depth * 0.05;
+        drop = Math.max(drop, depth + jitter);
+      } else if (t >= endT - rampDown && t <= endT) {
+        drop = Math.max(drop, smoothstep(0, 1, (endT - t) / rampDown) * depth);
+      }
+    }
+  });
+  return drop;
+}
+
+// ── Main draw function ────────────────────────────────────
+function drawCTG(canvas, config) {
+  const {
+    baseline = 140,
+    variability = 'normal',
+    cycling = true,
+    accels = false,
+    duration = 20,
+    decels = [],
+    contractions = []
+  } = config;
+
+  const W = Math.round(duration * PX_PER_MIN);
+  canvas.width  = W;
+  canvas.height = CANVAS_H;
+
+  const ctx = canvas.getContext('2d');
+  const amp = VAR_AMP[variability] ?? 8;
+
+  // Background
+  ctx.fillStyle = '#050816';
+  ctx.fillRect(0, 0, W, CANVAS_H);
+
+  // ── Grid ─────────────────────────────────────────────
+  // FHR horizontal lines
+  [60, 90, 120, 150, 180, 210].forEach(fhr => {
+    const y = fhrToPx(fhr);
+    ctx.strokeStyle = fhr === 150 ? 'rgba(100,116,139,0.4)' : 'rgba(71,85,105,0.22)';
+    ctx.lineWidth   = fhr === 150 ? 1.5 : 0.8;
+    ctx.setLineDash([]);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  });
+
+  // Vertical grid
+  for (let m = 0; m <= duration; m++) {
+    const x = m * PX_PER_MIN;
+    ctx.strokeStyle = m % 5 === 0 ? 'rgba(100,116,139,0.28)' : 'rgba(71,85,105,0.14)';
+    ctx.lineWidth   = m % 5 === 0 ? 0.8 : 0.5;
+    ctx.beginPath(); ctx.moveTo(x, FHR_TOP); ctx.lineTo(x, FHR_BOTTOM + 10); ctx.stroke();
+  }
+
+  // Separator
+  ctx.strokeStyle = 'rgba(100,116,139,0.35)';
+  ctx.lineWidth = 1; ctx.setLineDash([3, 5]);
+  ctx.beginPath(); ctx.moveTo(0, TOCO_TOP - 6); ctx.lineTo(W, TOCO_TOP - 6); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // TOCO grid
+  [25, 50, 75].forEach(p => {
+    ctx.strokeStyle = 'rgba(71,85,105,0.18)'; ctx.lineWidth = 0.5;
+    const y = tocoToPx(p);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  });
+
+  // Time labels
+  ctx.fillStyle = 'rgba(100,116,139,0.65)';
+  ctx.font = '9px system-ui';
+  ctx.textAlign = 'center';
+  for (let m = 5; m <= duration; m += 5) {
+    ctx.fillText(m + "'", m * PX_PER_MIN, CANVAS_H - 3);
+  }
+
+  // FHR label axis repeats every 10 min
+  ctx.font = '8.5px system-ui'; ctx.textAlign = 'right';
+  for (let m = 10; m <= duration; m += 10) {
+    [210, 180, 150, 120, 90, 60].forEach(fhr => {
+      const y = fhrToPx(fhr);
+      ctx.fillStyle = 'rgba(30,41,59,0.85)';
+      ctx.fillRect(m * PX_PER_MIN - 28, y - 7, 26, 13);
+      ctx.fillStyle = 'rgba(100,116,139,0.6)';
+      ctx.fillText(fhr, m * PX_PER_MIN - 4, y + 4);
+    });
+  }
+
+  // ── TOCO ─────────────────────────────────────────────
+  const tocoPath = [];
+  for (let x = 0; x < W; x++) {
+    const t = x / PX_PER_MIN;
+    let toco = 2 + hash(x * 0.05) * 1.5;
+    contractions.forEach(c => {
+      const w = (c.duration ?? 0.7) * 0.48;
+      toco += gaussian(t, c.time, w, c.amplitude ?? 85);
+    });
+    tocoPath.push(clamp(toco, 0, 100));
+  }
+
+  ctx.strokeStyle = 'rgba(251,191,36,0.9)'; ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  tocoPath.forEach((v, x) => {
+    const y = tocoToPx(v);
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.stroke();
+
+  // Fill under TOCO
+  ctx.fillStyle = 'rgba(251,191,36,0.06)';
+  ctx.beginPath();
+  tocoPath.forEach((v, x) => {
+    const y = tocoToPx(v);
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.lineTo(W, TOCO_BOTTOM); ctx.lineTo(0, TOCO_BOTTOM); ctx.closePath(); ctx.fill();
+
+  // ── FHR ──────────────────────────────────────────────
+  ctx.strokeStyle = '#6EE7FF';
+  ctx.lineWidth = 1.8;
+  ctx.shadowColor = 'rgba(110,231,255,0.35)';
+  ctx.shadowBlur = 3;
+  ctx.beginPath();
+
+  for (let x = 0; x < W; x++) {
+    const t  = x / PX_PER_MIN;
+    const cf = cycling ? cyclingFactor(t) : 1;
+    const v  = variabilityAt(x * 0.5, amp * cf);
+    const drop = decelDropAt(t, x, decels);
+
+    let fhr;
+    if (drop > 15) {
+      // Suppress variability during deceleration
+      fhr = baseline - drop + hash(x * 0.9) * (amp * 0.15);
+    } else {
+      fhr = baseline + v - drop;
+    }
+
+    // Accelerations
+    if (accels && drop < 5) {
+      const accelTrigger = Math.sin(x / 23) + 0.7 * Math.sin(x / 11.3);
+      if (accelTrigger > 1.4) {
+        const accelAmp = 10 + hash(x * 0.07) * 5;
+        const accelShape = Math.sin(Math.PI * ((accelTrigger - 1.4) / 0.6));
+        fhr += accelAmp * Math.max(0, accelShape);
+      }
+    }
+
+    fhr = clamp(fhr, 50, 210);
+    const y = fhrToPx(fhr);
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+}
+
+// ── UI Components ─────────────────────────────────────────
+
+const Slider = ({ label, value, min, max, step = 1, unit = '', onChange }) =>
+  e('div', { className: 'mb-3' },
+    e('div', { className: 'flex justify-between items-center mb-1' },
+      e('label', { className: 'text-xs text-slate-400' }, label),
+      e('span', { className: 'text-xs font-bold', style: { color: '#22d3ee' } },
+        value + (unit ? ' ' + unit : ''))
+    ),
+    e('input', {
+      type: 'range', min, max, step, value,
+      onChange: ev => onChange(Number(ev.target.value)),
+      className: 'w-full h-1.5 cursor-pointer rounded-full'
+    })
+  );
+
+const Select = ({ label, value, options, onChange }) =>
+  e('div', { className: 'mb-3' },
+    label && e('label', { className: 'block text-xs text-slate-400 mb-1' }, label),
+    e('select', {
+      value,
+      onChange: ev => onChange(ev.target.value),
+      className: 'w-full bg-slate-800/80 border border-slate-700 text-white text-xs rounded-lg px-2.5 py-2 focus:outline-none focus:border-cyan-500 transition-colors'
+    }, options.map(o => e('option', { key: o.value, value: o.value }, o.label)))
+  );
+
+const Toggle = ({ label, value, onChange }) =>
+  e('div', { className: 'flex items-center justify-between mb-3' },
+    e('span', { className: 'text-xs text-slate-400' }, label),
+    e('button', {
+      onClick: () => onChange(!value),
+      className: `relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${value ? 'bg-cyan-500' : 'bg-slate-700'}`
+    },
+      e('span', {
+        className: `inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${value ? 'translate-x-[18px]' : 'translate-x-[3px]'}`
+      })
+    )
+  );
+
+const SectionTitle = ({ children }) =>
+  e('p', {
+    className: 'text-[9px] font-bold uppercase tracking-widest text-slate-500 mb-2.5 mt-4 pb-1.5 border-b border-slate-800'
+  }, children);
+
+const NumberInput = ({ label, value, min, max, step, onChange, color = 'cyan' }) =>
+  e('div', null,
+    e('label', { className: 'text-[10px] text-slate-500 block mb-1' }, label),
+    e('input', {
+      type: 'number', min, max, step, value,
+      onChange: ev => onChange(Number(ev.target.value)),
+      className: 'w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-md px-2 py-1.5 focus:outline-none focus:border-cyan-500 transition-colors'
+    })
+  );
+
+// Deceleration card
+const DecelCard = ({ decel, index, onChange, onRemove }) =>
+  e('div', {
+    className: 'rounded-lg p-3 mb-2 border border-slate-700/60',
+    style: { background: 'rgba(15,23,42,0.6)' }
+  },
+    e('div', { className: 'flex items-center justify-between mb-2.5' },
+      e('span', { className: 'text-xs font-semibold', style: { color: '#22d3ee' } },
+        `Desacel. #${index + 1} · ${decel.type === 'variable' ? 'Variable' : decel.type === 'late' ? 'Tardía' : decel.type === 'prolonged' ? 'Prolongada' : 'Precoz'}`),
+      e('button', {
+        onClick: onRemove,
+        className: 'text-slate-600 hover:text-red-400 text-base leading-none transition-colors'
+      }, '×')
+    ),
+    e('div', { className: 'grid grid-cols-2 gap-2' },
+      e(NumberInput, { label: 'Tipo', value: decel.type, min: 0, max: 0, onChange: () => {} }),
+      // Override with select
+    ),
+    e('div', { className: 'mb-2' },
+      e('label', { className: 'text-[10px] text-slate-500 block mb-1' }, 'Tipo de desaceleración'),
+      e('select', {
+        value: decel.type,
+        onChange: ev => onChange({ ...decel, type: ev.target.value }),
+        className: 'w-full bg-slate-900 border border-slate-700 text-white text-xs rounded-md px-2 py-1.5 focus:outline-none focus:border-cyan-500'
+      },
+        e('option', { value: 'variable' }, 'Variable (barorreceptora)'),
+        e('option', { value: 'late' }, 'Tardía (quimiorreceptora)'),
+        e('option', { value: 'early' }, 'Precoz (espejo)'),
+        e('option', { value: 'prolonged' }, 'Prolongada (> 2 min)'),
+      )
+    ),
+    e('div', { className: 'grid grid-cols-3 gap-2' },
+      e(NumberInput, {
+        label: 'Inicio (min)', value: decel.time, min: 0.5, max: 60, step: 0.5,
+        onChange: v => onChange({ ...decel, time: v })
+      }),
+      e(NumberInput, {
+        label: 'Profundidad (lpm)', value: decel.depth, min: 10, max: 90, step: 5,
+        onChange: v => onChange({ ...decel, depth: v })
+      }),
+      e(NumberInput, {
+        label: 'Duración (seg)', value: decel.duration, min: 15, max: 300, step: 5,
+        onChange: v => onChange({ ...decel, duration: v })
+      })
+    )
+  );
+
+// Contraction card
+const ContractionCard = ({ contraction, index, onChange, onRemove }) =>
+  e('div', {
+    className: 'rounded-lg p-3 mb-2 border border-slate-700/60',
+    style: { background: 'rgba(15,23,42,0.6)' }
+  },
+    e('div', { className: 'flex items-center justify-between mb-2.5' },
+      e('span', { className: 'text-xs font-semibold text-amber-400' }, `Contracción #${index + 1}`),
+      e('button', {
+        onClick: onRemove,
+        className: 'text-slate-600 hover:text-red-400 text-base leading-none transition-colors'
+      }, '×')
+    ),
+    e('div', { className: 'grid grid-cols-3 gap-2' },
+      e(NumberInput, {
+        label: 'Inicio (min)', value: contraction.time, min: 0.5, max: 60, step: 0.5,
+        onChange: v => onChange({ ...contraction, time: v })
+      }),
+      e(NumberInput, {
+        label: 'Duración (min)', value: contraction.duration, min: 0.3, max: 2.5, step: 0.1,
+        onChange: v => onChange({ ...contraction, duration: v })
+      }),
+      e(NumberInput, {
+        label: 'Amplitud (UA)', value: contraction.amplitude ?? 85, min: 20, max: 100, step: 5,
+        onChange: v => onChange({ ...contraction, amplitude: v })
+      })
+    )
+  );
+
+// Y-axis overlay
+const YAxis = () =>
+  e('div', {
+    style: {
+      position: 'absolute', left: 0, top: 0,
+      width: AXIS_W, height: CANVAS_H,
+      pointerEvents: 'none', zIndex: 10,
+      background: 'linear-gradient(to right, #050816 65%, transparent)'
+    }
+  },
+    [210, 180, 150, 120, 90, 60].map(fhr =>
+      e('div', {
+        key: fhr,
+        style: {
+          position: 'absolute',
+          top: fhrToPx(fhr) - 7,
+          left: 0, width: AXIS_W - 4,
+          textAlign: 'right',
+          fontSize: 9,
+          color: 'rgba(148,163,184,0.75)',
+          fontFamily: 'system-ui'
+        }
+      }, fhr)
+    ),
+    e('div', {
+      style: {
+        position: 'absolute',
+        top: TOCO_TOP + 4,
+        left: 0, width: AXIS_W - 4,
+        textAlign: 'right',
+        fontSize: 8, color: 'rgba(251,191,36,0.5)',
+        fontFamily: 'system-ui', fontWeight: 'bold'
+      }
+    }, 'UA')
+  );
+
+// ── App ───────────────────────────────────────────────────
+function App() {
+  const [baseline,    setBaseline]    = useState(140);
+  const [variability, setVariability] = useState('normal');
+  const [cycling,     setCycling]     = useState(true);
+  const [accels,      setAccels]      = useState(false);
+  const [duration,    setDuration]    = useState(20);
+  const [decels,      setDecels]      = useState([]);
+  const [contractions,setContractions]= useState([]);
+
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      drawCTG(canvasRef.current, { baseline, variability, cycling, accels, duration, decels, contractions });
+    }
+  }, [baseline, variability, cycling, accels, duration, decels, contractions]);
+
+  const addDecel = () => setDecels(d => [...d, {
+    type: 'variable',
+    time: parseFloat((duration * 0.3).toFixed(1)),
+    depth: 35,
+    duration: 45
+  }]);
+
+  const addContraction = () => setContractions(c => [...c, {
+    time: parseFloat((duration * 0.3).toFixed(1)),
+    duration: 0.8,
+    amplitude: 80
+  }]);
+
+  const exportJSON = () => {
+    const data = {
+      fetalphysio_config: {
+        baseline, variability, cycling, accels, duration,
+        deceleraciones: decels.map((d, i) => ({
+          id: i + 1, tipo: d.type,
+          inicio_min: d.time,
+          profundidad_lpm: d.depth,
+          duracion_seg: d.duration
+        })),
+        contracciones: contractions.map((c, i) => ({
+          id: i + 1,
+          inicio_min: c.time,
+          duracion_min: c.duration,
+          amplitud_ua: c.amplitude ?? 85
+        }))
+      }
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'trazado-ctg.json';
+    a.click();
+  };
+
+  const exportPNG = () => {
+    if (!canvasRef.current) return;
+    const a = document.createElement('a');
+    a.href = canvasRef.current.toDataURL('image/png');
+    a.download = 'trazado-ctg.png';
+    a.click();
+  };
+
+  return e('div', {
+    style: {
+      display: 'flex', height: '100vh', overflow: 'hidden',
+      background: '#0B1120'
+    }
+  },
+
+    // ── LEFT SIDEBAR ──────────────────────────────────
+    e('div', {
+      style: {
+        width: 280, flexShrink: 0,
+        display: 'flex', flexDirection: 'column',
+        borderRight: '1px solid rgba(30,41,59,1)',
+        background: '#0D1321',
+        overflowY: 'auto'
+      }
+    },
+
+      // Header
+      e('div', {
+        style: {
+          padding: '16px 16px 12px',
+          borderBottom: '1px solid rgba(30,41,59,1)'
+        }
+      },
+        e('div', { style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 } },
+          e('div', {
+            style: {
+              width: 7, height: 7, borderRadius: '50%',
+              background: '#22d3ee',
+              boxShadow: '0 0 8px rgba(34,211,238,0.7)'
+            }
+          }),
+          e('span', { style: { fontSize: 13, fontWeight: 700, color: 'white', letterSpacing: -0.3 } },
+            'CTG ', e('span', { style: { color: '#22d3ee' } }, 'Creator')
+          )
+        ),
+        e('p', { style: { fontSize: 10, color: '#475569', margin: 0 } },
+          'FetalPhysio Tools · Demo')
+      ),
+
+      // Controls
+      e('div', { style: { flex: 1, padding: '12px 14px' } },
+
+        e(SectionTitle, null, 'Línea Basal'),
+        e(Slider, {
+          label: 'FCF Basal', value: baseline,
+          min: 60, max: 210, unit: 'lpm', onChange: setBaseline
+        }),
+
+        e(SectionTitle, null, 'Variabilidad & Cycling'),
+        e(Select, {
+          label: 'Variabilidad', value: variability, onChange: setVariability,
+          options: [
+            { value: 'absent',  label: 'Ausente  (< 2 lpm)' },
+            { value: 'minimal', label: 'Mínima   (2–5 lpm)' },
+            { value: 'normal',  label: 'Normal   (6–25 lpm)' },
+            { value: 'marked',  label: 'Marcada  (> 25 lpm)' },
+          ]
+        }),
+        e(Toggle, { label: 'Cycling fetal', value: cycling, onChange: setCycling }),
+        e(Toggle, { label: 'Aceleraciones', value: accels,  onChange: setAccels }),
+
+        e(SectionTitle, null, 'Duración del trazado'),
+        e(Slider, {
+          label: 'Duración', value: duration,
+          min: 5, max: 40, unit: 'min', onChange: setDuration
+        }),
+
+        e(SectionTitle, null, 'Desaceleraciones'),
+        ...decels.map((d, i) =>
+          e(DecelCard, {
+            key: i, decel: d, index: i,
+            onChange: v => setDecels(prev => prev.map((x, j) => j === i ? v : x)),
+            onRemove: () => setDecels(prev => prev.filter((_, j) => j !== i))
+          })
+        ),
+        e('button', {
+          onClick: addDecel,
+          style: {
+            width: '100%', padding: '8px',
+            borderRadius: 8, border: '1px dashed rgba(71,85,105,0.7)',
+            background: 'transparent', color: '#64748b',
+            fontSize: 11, cursor: 'pointer', marginBottom: 4,
+            transition: 'all 0.15s'
+          },
+          onMouseOver: ev => { ev.target.style.borderColor='#22d3ee'; ev.target.style.color='#22d3ee'; },
+          onMouseOut:  ev => { ev.target.style.borderColor='rgba(71,85,105,0.7)'; ev.target.style.color='#64748b'; }
+        }, '+ Agregar desaceleración'),
+
+        e(SectionTitle, null, 'Contracciones'),
+        ...contractions.map((c, i) =>
+          e(ContractionCard, {
+            key: i, contraction: c, index: i,
+            onChange: v => setContractions(prev => prev.map((x, j) => j === i ? v : x)),
+            onRemove: () => setContractions(prev => prev.filter((_, j) => j !== i))
+          })
+        ),
+        e('button', {
+          onClick: addContraction,
+          style: {
+            width: '100%', padding: '8px',
+            borderRadius: 8, border: '1px dashed rgba(71,85,105,0.7)',
+            background: 'transparent', color: '#64748b',
+            fontSize: 11, cursor: 'pointer',
+            transition: 'all 0.15s'
+          },
+          onMouseOver: ev => { ev.target.style.borderColor='#f59e0b'; ev.target.style.color='#f59e0b'; },
+          onMouseOut:  ev => { ev.target.style.borderColor='rgba(71,85,105,0.7)'; ev.target.style.color='#64748b'; }
+        }, '+ Agregar contracción')
+      ),
+
+      // Export buttons
+      e('div', { style: { padding: '12px 14px', borderTop: '1px solid rgba(30,41,59,1)' } },
+        e('button', {
+          onClick: exportJSON,
+          style: {
+            width: '100%', padding: '10px',
+            borderRadius: 8, border: 'none',
+            background: '#0891b2', color: 'white',
+            fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            marginBottom: 8, transition: 'background 0.15s'
+          },
+          onMouseOver: ev => ev.target.style.background = '#06b6d4',
+          onMouseOut:  ev => ev.target.style.background = '#0891b2'
+        }, '↓  Exportar JSON'),
+        e('button', {
+          onClick: exportPNG,
+          style: {
+            width: '100%', padding: '10px',
+            borderRadius: 8,
+            border: '1px solid rgba(71,85,105,0.6)',
+            background: 'transparent', color: '#94a3b8',
+            fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            transition: 'all 0.15s'
+          },
+          onMouseOver: ev => { ev.target.style.background='rgba(30,41,59,0.7)'; ev.target.style.color='white'; },
+          onMouseOut:  ev => { ev.target.style.background='transparent'; ev.target.style.color='#94a3b8'; }
+        }, '↓  Exportar PNG')
+      )
+    ),
+
+    // ── CANVAS AREA ───────────────────────────────────
+    e('div', { style: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' } },
+
+      // Top bar
+      e('div', {
+        style: {
+          padding: '10px 20px',
+          borderBottom: '1px solid rgba(30,41,59,1)',
+          background: '#0D1321',
+          display: 'flex', alignItems: 'center', gap: 20,
+          flexShrink: 0
+        }
+      },
+        e('span', { style: { fontSize: 10, color: '#475569', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 } },
+          'Vista previa · Tiempo real'),
+        e('span', { style: { fontSize: 11, fontWeight: 700, color: '#6EE7FF' } },
+          `FCF ${baseline} lpm`),
+        decels.length > 0 && e('span', { style: { fontSize: 11, color: '#a78bfa' } },
+          `${decels.length} desacel.`),
+        contractions.length > 0 && e('span', { style: { fontSize: 11, color: '#fbbf24' } },
+          `${contractions.length} contrac.`),
+        e('span', { style: { fontSize: 11, color: '#475569' } },
+          `${duration} min · ${Math.round(duration * PX_PER_MIN)}px`)
+      ),
+
+      // Canvas scroll area
+      e('div', {
+        style: { flex: 1, overflow: 'auto', padding: '20px 16px 16px' }
+      },
+        e('div', {
+          style: { position: 'relative', display: 'inline-block', minWidth: '100%' }
+        },
+          // Y-axis overlay
+          e(YAxis),
+          // Canvas
+          e('canvas', {
+            ref: canvasRef,
+            style: {
+              display: 'block',
+              marginLeft: AXIS_W,
+              borderRadius: 10,
+              border: '1px solid rgba(110,231,255,0.07)',
+              boxShadow: '0 8px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(110,231,255,0.04)'
+            }
+          })
+        )
+      ),
+
+      // Bottom hint
+      e('div', {
+        style: {
+          padding: '6px 20px',
+          borderTop: '1px solid rgba(30,41,59,0.6)',
+          display: 'flex', gap: 16
+        }
+      },
+        e('span', { style: { fontSize: 9.5, color: '#334155' } },
+          '■ FCF en azul-cian  ·  ■ TOCO en ámbar  ·  Escala: 1 cm/min'),
+        e('span', { style: { fontSize: 9.5, color: '#334155', marginLeft: 'auto' } },
+          'CTG Creator — FetalPhysio Tools · Demo')
+      )
+    )
+  );
+}
+
+// Patch: remove bad grid column in DecelCard
+// (the initial NumberInput for type was accidentally added — it's ignored since the select below overrides)
+
+ReactDOM.createRoot(document.getElementById('root')).render(e(App));
+</script>
+</body>
+</html>
